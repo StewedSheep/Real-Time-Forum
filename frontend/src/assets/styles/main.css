@@ -1,0 +1,61 @@
+body {
+    margin: 20px 50px;
+}
+.main {
+    background-color: rgb(238, 238, 238);
+}
+a {
+    text-decoration: none;
+    color: black;
+}
+h1, ol {
+    margin: 20px;
+}
+p {
+    margin: 5px 0;
+}
+h4 {
+    margin: 0;
+    background-color: gold;
+    padding: 10px;
+}
+h4:hover {
+    background-color: goldenrod;
+}
+.top-bar {
+    background-color:goldenrod;
+    padding: 0 20px;
+}
+.bottom {
+    display: flex;
+    color: darkgray;
+    font-size: 13px;
+}
+.timestamp {
+    padding-right: 10px;
+}
+.link {
+    color: blue;
+}
+.btn-group button {
+background-color: gold;
+border: 1px solid goldenrod;
+color: black;
+padding: 10px 24px;
+cursor: pointer;
+float: left;
+}
+
+.btn-group:after {
+content: "";
+clear: both;
+display: table;
+}
+
+.btn-group button:not(:last-child) {
+border-right: none;
+}
+
+.btn-group button:hover {
+background-color: goldenrod;
+}
