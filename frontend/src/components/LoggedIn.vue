@@ -1,27 +1,19 @@
 <template>
-<div id="app">
-    <div v-if="loggedUsername" class="menu">
+    <div id="app">
+    <div class="menu">
                 <h4>Logged in as: {{ loggedUsername }} </h4>
-                <span @click="logOut()">Log Out</span>
+                <router-link @click.native="logOut()" to="/">Log Out</router-link>
                     or
                 <router-link to="newThread">Create a New Thread</router-link>
             </div>
-            <div v-else class="menu">
-                <router-link to="login">Login</router-link>
-                or
-                <router-link to="register">Register</router-link>
-                </div>
-            <br>
-        </div>
+    </div>
 </template>
 
 <script>
 import Vue from 'vue'
-
 export default {
     props: ['loggedUsername'],
-  data() {},
-  methods : {
+    methods : {
       logOut: function() {
       Vue.axios.post('/logout', {
     headers: {
@@ -33,4 +25,4 @@ export default {
     // redirecting???   sucReg: function() {{setTimeout(() => this.$router.push({ name: 'login' }), 3000)}},
   }
 }
-</script>
+</script>>

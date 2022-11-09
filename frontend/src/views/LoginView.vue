@@ -22,7 +22,7 @@ export default {
           'Content-Type': 'text/plain',
           'Access-Control-Allow-Origin': '*'
             }
-        }).then((response) => (this.LoginError = response.data))
+        }).then((response) => (this.LoginError = response.data));
       },
     }
 }

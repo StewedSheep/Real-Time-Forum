@@ -3,7 +3,7 @@ import app from "./App.vue"
 import VueRouter from 'vue-router';
 import axios from "axios";
 import VueAxios from "vue-axios";
-import VueCookies from 'vue-cookies';
+import VueCookies from 'vue-cookies-reactive';
 export default router
 
 import HomeView from './views/HomeView.vue'
@@ -13,6 +13,17 @@ import NewThreadView from './views/NewThreadView.vue'
 
 
 Vue.config.productionTip = false;
+
+const store = Vue.observable({ 
+  auth: {
+    user: '',
+    set(unam){
+      store.auth.user = unam;
+    }
+  }
+});
+
+Vue.prototype.$store = store
 
 const client = axios.create({
   baseURL: "/api/v1",

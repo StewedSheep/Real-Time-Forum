@@ -8,7 +8,7 @@ export default {
 
 <template>
 <div id="app">
-        <div v-if="Username" class="main">
+        <!-- <div v-if="Username" class="main"> -->
 
         <br>
         <form action="newthreadinf" method="POST">
@@ -29,10 +29,10 @@ export default {
     <textarea type="text" name="content" id="content" required></textarea>
     <td><input type="submit" name="submit" value="Post Thread"></td>
     </form>
-</div>
+<!-- </div>
     <div v-else>
         <h3>Please log in or create user to post a new thread.</h3>
-    </div>
+    </div> -->
 <router-view />
 </div>
 </template>
