@@ -1,7 +1,7 @@
 <template>
     <div id="app">
     <div class="menu">
-                <h4>Logged in as: {{ loggedUsername }} </h4>
+                <h4>Logged in as: {{$user.current}} </h4>
                 <router-link @click.native="logOut()" to="/">Log Out</router-link>
                     or
                 <router-link to="newThread">Create a New Thread</router-link>

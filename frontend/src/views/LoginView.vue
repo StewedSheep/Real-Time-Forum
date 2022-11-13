@@ -30,7 +30,10 @@ export default {
 
 
 <template>
-<div id="app">
+<div v-if="$user.isAuthorised">
+  <h3>Already Logged in.</h3>
+</div>
+<div v-else id="app">
     <center>
         <h3>Login here</h3>
 

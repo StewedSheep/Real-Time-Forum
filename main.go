@@ -48,6 +48,9 @@ func Handler() http.Handler {
 			if strings.HasSuffix(_path, "law") {
 				GetRandomLaw(w, r)
 			}
+			if strings.HasSuffix(_path, "threaddat") {
+				CreateThread(w, r)
+			}
 			return
 		}
 

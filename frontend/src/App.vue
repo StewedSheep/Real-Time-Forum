@@ -1,8 +1,8 @@
 <template>
   <div>
     <PageHeader/>
-    <component :key="componentKey" v-bind:is="comp" v-bind:loggedUsername="loggedUsername" />
-    <component :key="componentKey" v-bind:is="component" />
+    <component v-bind:is="comp" />
+    <component v-bind:is="component" />
     <router-view/>
   </div>
 </template>
@@ -16,7 +16,7 @@ import PageHeader from './components/PageHeader.vue';
 
 let loggedUsername;
 
-console.log($store.auth.user);
+//console.log(this.$user.get);
 
 export default {
   data() {
@@ -26,7 +26,10 @@ export default {
 created: function() {
   const timer = setInterval(() => {
     this.loggedUsername = document.cookie.split('::')[1];
-    $store.auth.set(this.loggedUsername);
+    //sets username to global storage
+    this.$user.authorised({
+      username : this.loggedUsername,
+    });
   }, 100);
   //destroys last check hook so new can be run
   this.$once("hook:beforeDestroy", () => {

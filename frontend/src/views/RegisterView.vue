@@ -26,14 +26,16 @@ export default {
         }
       }).then((response) => (this.RegisterError = response.data))
     },
-    // redirecting???   sucReg: function() {{setTimeout(() => this.$router.push({ name: 'login' }), 3000)}},
   }
 }
 </script>
 
 
 <template>
-        <div id="app">
+  <div v-if="$user.isAuthorised">
+  <h3>Already Logged in.</h3>
+</div>
+        <div v-else id="app">
         <center>
             <h3>Register a New Account</h3>
         <br>

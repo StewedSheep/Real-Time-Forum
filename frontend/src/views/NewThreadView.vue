@@ -1,23 +1,37 @@
 <script>
+import Vue from 'vue'
+
 export default {
   name: "NewThreadView.vue",
-  components: {}
+  components: {},
+  methods : {
+      createThread: function() {
+      var data = {title: this.title,
+                  category: this.category,
+                  content: this.content,
+                }
+      Vue.axios.post('/threaddat', data, {
+    headers: {
+          'Content-Type': 'text/plain',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }).then((response) => (this.RegisterError = response.data))
+    },
+  }
 }
 </script>
 
 
 <template>
-<div id="app">
-        <!-- <div v-if="Username" class="main"> -->
-
-        <br>
-        <form action="newthreadinf" method="POST">
-        <tr>
-            <td>Thread topic:</td>
-            <td>
-                <input type="text" name="thtopic" id="thtopic" minlength="2" required>
-                <label for="catergory">Choose a category:</label>
-                <select name="category" id="category" required>
+  <div v-if="$user.isAuthorised">
+    <br>
+        <form>
+        <tr><br><td>
+                <label>Thread Topic:</label><br>
+            <input type="text" v-model="title" name="title" required /><br><br>
+                <br>
+                <label>Choose a category:</label>
+                <select v-model="category" required>
                     <option value="general">General</option>
                     <option value="help">Help</option>
                     <option value="news">News</option>
@@ -25,14 +39,21 @@ export default {
                     <option value="offtopic">Off-topic</option>
                   </select>
             </td>
-        </tr>   
-    <textarea type="text" name="content" id="content" required></textarea>
-    <td><input type="submit" name="submit" value="Post Thread"></td>
+        </tr>
+        <br>  
+        <textarea v-model="content" required></textarea>
+    <br>
+    <button type="button" @click="createThread()">Post new Thread</button> 
     </form>
-<!-- </div>
-    <div v-else>
-        <h3>Please log in or create user to post a new thread.</h3>
-    </div> -->
-<router-view />
+</div>
+<div v-else id="app">
+    <h3>Login to create a new thread.</h3>
 </div>
 </template>
+
+<style scoped>
+textarea {
+  width: 50%;
+  height: 150px;
+}
+</style>

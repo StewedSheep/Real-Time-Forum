@@ -10,6 +10,7 @@ import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
 import RegisterView from './views/RegisterView.vue'
 import NewThreadView from './views/NewThreadView.vue'
+import GlobalStores from './plugins/GlobalStores';
 
 
 Vue.config.productionTip = false;
@@ -23,7 +24,7 @@ const store = Vue.observable({
   }
 });
 
-Vue.prototype.$store = store
+Vue.use(GlobalStores)
 
 const client = axios.create({
   baseURL: "/api/v1",
