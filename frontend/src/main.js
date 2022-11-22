@@ -4,6 +4,7 @@ import VueRouter from 'vue-router';
 import axios from "axios";
 import VueAxios from "vue-axios";
 import VueCookies from 'vue-cookies-reactive';
+import vSelect from "vue-select";
 export default router
 
 import HomeView from './views/HomeView.vue'
@@ -25,6 +26,7 @@ const store = Vue.observable({
 });
 
 Vue.use(GlobalStores)
+Vue.component("v-select", vSelect);
 
 const client = axios.create({
   baseURL: "/api/v1",

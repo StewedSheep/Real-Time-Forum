@@ -19,6 +19,7 @@ export default {
     },
   }
 }
+
 </script>
 
 
@@ -31,13 +32,7 @@ export default {
             <input type="text" v-model="title" name="title" required /><br><br>
                 <br>
                 <label>Choose a category:</label>
-                <select v-model="category" required>
-                    <option value="general">General</option>
-                    <option value="help">Help</option>
-                    <option value="news">News</option>
-                    <option value="discussion">Discussion</option>
-                    <option value="offtopic">Off-topic</option>
-                  </select>
+                <v-select v-model="category" :options="['General', 'Help' ,'News', 'Discussion', 'Off-Topic']"></v-select>
             </td>
         </tr>
         <br>  
