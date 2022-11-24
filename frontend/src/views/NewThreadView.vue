@@ -1,6 +1,11 @@
 <script>
 import Vue from 'vue'
 
+var today = new Date();
+var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+var dateTime = date+' '+time;
+
 export default {
   name: "NewThreadView.vue",
   components: {},
@@ -18,15 +23,17 @@ export default {
         const formIsValid = !!this.form.category && !!this.form.title && !!this.form.content
         if (formIsValid){
       var data = {title: this.form.title,
+                  author: this.$user.current,
+                  date: dateTime,
                   category: this.form.category,
                   content: this.form.content,
                 }
-      Vue.axios.post('/threaddat', data, {
+      Vue.axios.put('/threaddat', data, {
     headers: {
           'Content-Type': 'text/plain',
           'Access-Control-Allow-Origin': '*'
         }
-      }).then((response) => (this.RegisterError = response.data))} else {
+      })} else {
         console.log("form is not valid")
       }
     },

@@ -45,7 +45,7 @@ func Handler() http.Handler {
 			if strings.HasSuffix(_path, "register") {
 				ValidateRegister(w, r)
 			}
-			if strings.HasSuffix(_path, "law") {
+			if strings.HasSuffix(_path, "totThread") {
 				GetRandomLaw(w, r)
 			}
 			if strings.HasSuffix(_path, "threaddat") {
@@ -60,7 +60,7 @@ func Handler() http.Handler {
 			return
 		}
 
-		// all 404 gonna be served as root
+		// all 404 going to be served as root
 		http.ServeFile(w, r, ("frontend/dist/index.html"))
 	})
 }

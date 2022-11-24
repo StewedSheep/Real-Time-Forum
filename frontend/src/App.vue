@@ -16,8 +16,6 @@ import PageHeader from './components/PageHeader.vue';
 
 let loggedUsername;
 
-//console.log(this.$user.get);
-
 export default {
   data() {
     return{loggedUsername, componentKey: 0, comp: LoggedOut, component: UnloggedNavBar}
@@ -29,7 +27,7 @@ created: function() {
     //sets username to global storage
     this.$user.authorised({
       username : this.loggedUsername,
-    });
+    })
   }, 100);
   //destroys last check hook so new can be run
   this.$once("hook:beforeDestroy", () => {
