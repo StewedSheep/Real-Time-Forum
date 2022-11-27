@@ -13,6 +13,29 @@ export default {
   mounted() {
           Vue.axios.get("/totThread").then((response) => (this.Threads = response.data));
     },
+    methods:{
+    liGen: function(){
+      this.cate = "General"
+    },
+    liHel: function(){
+      this.cate = "Help"
+    },
+    liNew: function(){
+      this.cate = "News"
+    },
+    liDis: function(){
+      this.cate = "Discussion"
+    },
+    liOff: function(){
+      this.cate = "Off-Topic"
+    },
+    liLik: function(){
+      this.cate = "Liked-Posts"
+    },
+    liMyP: function(){
+      this.cate = "My-Posts"
+    },
+  }
 }
 </script>
 
@@ -21,11 +44,11 @@ export default {
       <div v-if="!$user.isAuthorised">
           <p>Sort posts by:</p>
         <div class="btn-group" style="width:100%">
-          <button href="general" style="width:20%">General</button>
-          <button href="help" style="width:20%">Help</button>
-          <button href="news" style="width:20%">News</button>
-          <button href="discussion" style="width:20%">Discussion</button>
-          <button href="offTopic" style="width:20%">Off-Topic</button>
+          <button type="button" @click="liGen()" style="width:20%">General</button>
+          <button type="button" @click="liHel()" style="width:20%">Help</button>
+          <button type="button" @click="liNew()" style="width:20%">News</button>
+          <button type="button" @click="liDis()" style="width:20%">Discussion</button>
+          <button type="button" @click="liOff()" style="width:20%">Off-Topic</button>
         </div>
       <br><br>
       </div>
@@ -33,13 +56,13 @@ export default {
       <div v-if="$user.isAuthorised">
           <p>Sort posts by:</p>
       <div class="btn-group" style="width:100%">
-          <button href="general" style="width:14.28%">General</button>
-          <button href="help" style="width:14.28%">Help</button>
-          <button href="news" style="width:14.28%">News</button>
-          <button href="discussion" style="width:14.28%">Discussion</button>
-          <button href="offTopic" style="width:14.28%">Off-Topic</button>
-          <button href="likedPosts" style="width:14.28%">Liked-Posts</button>
-          <button href="myPosts" style="width:14.28%">My-Posts</button>
+          <button type="button" @click="liGen()" style="width:14.28%">General</button>
+          <button type="button" @click="liHel()" style="width:14.28%">Help</button>
+          <button type="button" @click="liNew()" style="width:14.28%">News</button>
+          <button type="button" @click="liDis()" style="width:14.28%">Discussion</button>
+          <button type="button" @click="liOff()" style="width:14.28%">Off-Topic</button>
+          <button type="button" @click="liLik()" style="width:14.28%">Liked-Posts</button>
+          <button type="button" @click="liMyP()" style="width:14.28%">My-Posts</button>
         </div>
         <br><br>
         </div>
@@ -47,8 +70,10 @@ export default {
     <div id="threadList">
     <div v-if="Threads != null">
       <div v-for="Thread in Threads" :key="Thread">
+        <li v-if="Thread.category==cate">
       <h1>{{ Thread.title }}</h1>
       <p>{{ Thread }}</p>
+      </li>
     </div>
     </div>
     </div>
