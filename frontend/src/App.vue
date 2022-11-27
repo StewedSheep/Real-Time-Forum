@@ -2,7 +2,6 @@
   <div>
     <PageHeader/>
     <component v-bind:is="comp" />
-    <component v-bind:is="component" />
     <router-view/>
   </div>
 </template>
@@ -10,15 +9,13 @@
 <script>
 import LoggedIn from './components/LoggedIn.vue'
 import LoggedOut from './components/LoggedOut.vue'
-import LoggedNavBar from './components/LoggedNavBar.vue';
-import UnloggedNavBar from './components/UnloggedNavBar.vue';
 import PageHeader from './components/PageHeader.vue';
 
 let loggedUsername;
 
 export default {
   data() {
-    return{loggedUsername, componentKey: 0, comp: LoggedOut, component: UnloggedNavBar}
+    return{loggedUsername, componentKey: 0, comp: LoggedOut}
    },
   //checks for cookie updates every 100ms
 created: function() {
@@ -39,11 +36,9 @@ created: function() {
     loggedUsername(newVal, oldVal) {
       if (newVal != ""){
       this.comp = LoggedIn;
-      this.component = LoggedNavBar;
       }
       if (newVal == null){
       this.comp = LoggedOut;
-      this.component = UnloggedNavBar;
       }
       console.log(newVal);
       if(oldVal != newVal){
@@ -58,8 +53,6 @@ created: function() {
     "PageHeader": PageHeader,
     "LoggedIn": LoggedIn,
     "LoggedOut": LoggedOut,
-    "LoggedNavBar": LoggedNavBar,
-    "UnloggedNavBar": UnloggedNavBar,
 },
 }
 </script>
