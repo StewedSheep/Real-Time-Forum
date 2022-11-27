@@ -6,24 +6,25 @@ export default {
   components: {},
   data (){
     return {
-      law: null,
+      Threads: [],
     };
   },
-  beforeMount() {
-          Vue.axios.get("/totThread").then((response) => (this.law = response.data));
+  mounted() {
+          Vue.axios.get("/totThread").then((response) => (this.Threads = response.data));
     },
 }
 </script>
 
 <template>
   <div id="app">
-    <div id="Law">
-    <div v-if="law != null">
-      <h1>{{ law.name }}</h1>
-      <p>{{ law.definition }}</p>
+    <div id="threadList">
+    <div v-if="Threads != null">
+      <div v-for="Thread in Threads" :key="Thread">
+      <h1>{{ Thread.title }}</h1>
+      <p>{{ Thread }}</p>
     </div>
     </div>
-    <router-view />
+    </div>
 </div>
 </template>
 
