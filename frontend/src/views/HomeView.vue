@@ -30,10 +30,11 @@ export default {
       this.cate = "Off-Topic"
     },
     liLik: function(){
-      this.cate = "Liked-Posts"
+      // this.cate = "Liked-Posts" QOTD: HOW TO FILTER LIKED POSTS 
     },
     liMyP: function(){
       this.cate = "My-Posts"
+      this.auth = this.$user.current
     },
   }
 }
@@ -56,13 +57,12 @@ export default {
       <div v-if="$user.isAuthorised">
           <p>Sort posts by:</p>
       <div class="btn-group" style="width:100%">
-          <button type="button" @click="liGen()" style="width:14.28%">General</button>
-          <button type="button" @click="liHel()" style="width:14.28%">Help</button>
-          <button type="button" @click="liNew()" style="width:14.28%">News</button>
-          <button type="button" @click="liDis()" style="width:14.28%">Discussion</button>
-          <button type="button" @click="liOff()" style="width:14.28%">Off-Topic</button>
-          <button type="button" @click="liLik()" style="width:14.28%">Liked-Posts</button>
-          <button type="button" @click="liMyP()" style="width:14.28%">My-Posts</button>
+          <button type="button" @click="liGen()" style="width:16.667%">General</button>
+          <button type="button" @click="liHel()" style="width:16.667%">Help</button>
+          <button type="button" @click="liNew()" style="width:16.667%">News</button>
+          <button type="button" @click="liDis()" style="width:16.667%">Discussion</button>
+          <button type="button" @click="liOff()" style="width:16.667%">Off-Topic</button>
+          <button type="button" @click="liMyP()" style="width:16.667%">My-Posts</button>
         </div>
         <br><br>
         </div>
@@ -72,6 +72,14 @@ export default {
       <div v-for="Thread in Threads" :key="Thread">
         <li v-if="Thread.category==cate">
       <h1>{{ Thread.title }}</h1>
+      <p>{{ Thread }}</p>
+      </li>
+      <li v-else-if="'My-Posts'==cate && Thread.author==auth">
+        <h1>{{ Thread.title }}</h1>
+      <p>{{ Thread }}</p>
+      </li>
+      <li v-else-if="!cate && !auth">
+        <h1>{{ Thread.title }}</h1>
       <p>{{ Thread }}</p>
       </li>
     </div>
