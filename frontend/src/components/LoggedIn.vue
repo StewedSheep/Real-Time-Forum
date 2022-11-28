@@ -2,7 +2,7 @@
     <div id="app">
     <div class="menu">
                 <h4>Logged in as: {{$user.current}} </h4>
-                <router-link @click.native="logOut()" to="/">Log Out</router-link>
+                <router-link class="logButton" @click.native="logOut()" to="/">Log Out</router-link>
                     or
                 <router-link to="newThread">Create a New Thread</router-link>
             </div>

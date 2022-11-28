@@ -1,6 +1,7 @@
 <script>
 import Vue from 'vue'
 
+
 export default {
   name: "LoginView.vue",
   components: {},
@@ -45,19 +46,17 @@ export default {
 
 <form>
             <label>Username or Email:</label><br>
-            <input type="text" v-model="username" name="username" /><br><br>
+            <input class="logButton" type="text" v-model="username" name="username" /><br><br>
 
             <label for="password">Password:</label><br>
-            <input type="password" v-model="password" name="password" /><br><br>
+            <input  class="logButton" type="password" v-model="password" name="password" /><br><br>
 
             <br>
           </form> 
 
             <div>
-      <button type="button" @click="postLog()">Login</button>  <br><br>
-<td>
-    No account? <router-link to="register">Register here!</router-link>
-</td>
+      <button class="logButton" type="button" @click="postLog()">Login</button>  <br><br>
+  <router-link to="register"><img class="noAccount" src="@/assets/no_account.jpg" alt="Click here to register!"></router-link>
     </div>
 <router-view />
 </center>

@@ -45,33 +45,33 @@ export default {
         <br>
         <form>
             <label>Email:</label><br>
-            <input type="text" v-model="email" name="email" /><br><br>
+            <input class="logButton" type="text" v-model="email" name="email" /><br><br>
 
             <label for="username">Username:</label><br>
-            <input type="text" v-model="username" name="username" /><br><br>
+            <input class="logButton" type="text" v-model="username" name="username" /><br><br>
 
             <label for="password">Password:</label><br>
-            <input type="password" v-model="password" name="password" /><br><br>
+            <input class="logButton" type="password" v-model="password" name="password" /><br><br>
 
             <label for="firstName">First Name:</label><br>
-            <input type="text" v-model="firstName" name="firstName" /><br><br>
+            <input class="logButton" type="text" v-model="firstName" name="firstName" /><br><br>
 
             <label for="lastName">Last Name:</label><br>
-            <input type="text" v-model="lastName" name="lastName" /><br><br>
+            <input class="logButton" type="text" v-model="lastName" name="lastName" /><br><br>
 
             <label for="gender">Gender:</label><br>
-           <select v-model="gender">
+           <select class="logButton" v-model="gender">
             <option>Male</option>
             <option>Female</option>
             </select><br><br>
 
             <label for="birthday">Birthday:</label><br>
-            <input type="date" v-model="birthday" name="birthday">
+            <input class="logButton" type="date" v-model="birthday" name="birthday">
             <br><br><br>
           </form> 
 
             <div>
-      <button type="button" @click="postReg()">Submit</button>  
+      <button class="logButton" type="button" @click="postReg()">Submit</button>  
     </div>
   <br><br><br>
 
@@ -85,21 +85,3 @@ export default {
 </div>
 </template>
 
-<style>
-.button {
-  background-color: #f4511e;
-  border: none;
-  color: white;
-  padding: 16px 32px;
-  text-align: center;
-  font-size: 16px;
-  margin: 4px 2px;
-  opacity: 0.6;
-  transition: 0.3s;
-  display: inline-block;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.button:hover {opacity: 1}
-</style>

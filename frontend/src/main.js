@@ -5,7 +5,7 @@ import axios from "axios";
 import VueAxios from "vue-axios";
 import VueCookies from 'vue-cookies-reactive';
 import vSelect from "vue-select";
-export default router
+
 
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
@@ -74,3 +74,4 @@ new Vue({
   router: router,
   render: h => h(app)
 }).$mount('#app');
+export default router

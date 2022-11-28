@@ -1,11 +1,8 @@
 <template>
         <div id="app" class="top-bar">
-            <router-link :key="$route.fullPath" to="/"><h1>
-                <br>
-                Real Time Forum
-                <br>
-            </h1>
-            </router-link>
+          <h1><router-link :key="$route.fullPath" to="/">
+                Golden Time Forum
+            </router-link></h1>  
         </div>
 </template>
 

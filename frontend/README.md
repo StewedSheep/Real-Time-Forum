@@ -4,6 +4,11 @@
 ```
 npm install
 ```
+### Axios and vue-axios
+```
+npm install axios
+npm install vue-axios
+```
 
 ### Compiles and hot-reloads for development
 ```
