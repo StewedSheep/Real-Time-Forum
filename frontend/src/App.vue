@@ -15,7 +15,9 @@ let loggedUsername;
 
 export default {
   data() {
-    return{loggedUsername, componentKey: 0, comp: LoggedOut}
+    return{loggedUsername,
+      componentKey: 0,
+      comp: LoggedOut,}
    },
   //checks for cookie updates every 100ms
 created: function() {
@@ -30,7 +32,7 @@ created: function() {
   this.$once("hook:beforeDestroy", () => {
     clearInterval(timer);
   });
-} ,
+},
   //watches for changes in logged in username and changes components
   watch: {
     loggedUsername(newVal, oldVal) {

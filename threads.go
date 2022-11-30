@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -33,8 +32,8 @@ type Threads struct {
 
 func GetRandomLaw(w http.ResponseWriter, r *http.Request) {
 	threadDb, _ := sql.Open("sqlite3", "./data.db")
-	///////////////////////////////////////////////////////
 	var AllThreads []Threads
+
 	rows, err := threadDb.Query("SELECT id, title, author, date, category, content FROM threads")
 	if err != nil {
 		log.Fatal(err)
@@ -46,18 +45,17 @@ func GetRandomLaw(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 		AllThreads = append(AllThreads, Threads{Id: strconv.Itoa(id), Title: title, Author: author, Date: date, Category: category, Content: content})
-
 	}
 	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
-	////////////////////////////////////////////////////////
+
 	j, err := json.Marshal(AllThreads)
 	if err != nil {
 		http.Error(w, "couldn't retrieve threads", http.StatusInternalServerError)
 	}
+	
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Println(j)
 	io.Copy(w, bytes.NewReader(j))
 }

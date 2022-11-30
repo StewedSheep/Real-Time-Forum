@@ -29,6 +29,8 @@ func main() {
 func Handler() http.Handler {
 
 	handler := http.FileServer(http.Dir("frontend/dist"))
+	var wsServer = NewWebsocketServer()
+	go wsServer.Run()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_path := r.URL.Path
@@ -37,7 +39,6 @@ func Handler() http.Handler {
 		if strings.HasPrefix(_path, "/api/v1/") {
 			if strings.HasSuffix(_path, "login") {
 				LoginAuth(w, r)
-
 			}
 			if strings.HasSuffix(_path, "logout") {
 				ResetCookie(w, r)
@@ -50,6 +51,9 @@ func Handler() http.Handler {
 			}
 			if strings.HasSuffix(_path, "threaddat") {
 				CreateThread(w, r)
+			}
+			if strings.HasSuffix(_path, "ws") {
+				ServeWs(wsServer, w, r)
 			}
 			return
 		}
