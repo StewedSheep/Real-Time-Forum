@@ -11,12 +11,15 @@ export default {
   },
   computed: {
     sortPOST(){
-      return this.Threads.filter((t) => {
+      let filteredStories =  this.Threads.filter((t) => {
         let categor = this.cate
         if("My-Posts"==categor){
           return t.author === this.$user.current
         }else{return t.category.includes(categor)}
      })
+      let orderedStories = filteredStories.sort((a, b) => {
+        return b.id - a.id;})
+        return orderedStories
     },
     },
     methods:{

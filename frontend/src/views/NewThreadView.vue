@@ -19,7 +19,7 @@ export default {
     }
   },
   methods : {
-      createThread: function() {
+    createThread: function() {
         const formIsValid = !!this.form.category && !!this.form.title && !!this.form.content
         if (formIsValid){
       var data = {title: this.form.title,
@@ -33,10 +33,11 @@ export default {
           'Content-Type': 'text/plain',
           'Access-Control-Allow-Origin': '*'
         }
-      })} else {
+      }).then(this.$router.push("/"))} else {
         console.log("form is not valid")
       }
     },
+
   }
 }
 
