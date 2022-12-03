@@ -55,7 +55,7 @@ export default {
           </form> 
 
             <div>
-      <router-link class="logButton" type="button" @click="postLog()" to="/">Login</router-link>  <br><br>
+      <button class="logButton" type="button" @click="postLog()">Login</button>  <br><br>
   <router-link to="register"><img class="noAccount" src="@/assets/no_account.jpg" alt="Click here to register!"></router-link>
     </div>
 <router-view />

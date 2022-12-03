@@ -49,17 +49,24 @@ export default {
         <form>
         <tr><br><td>
                 <label>Thread Topic:</label><br>
-            <input type="text" v-model="form.title" name="title" required /><br><br>
+            <input class="logButton" type="text" v-model="form.title" name="title" required /><br><br>
                 <br>
                 <label>Choose a category:</label>
-                <v-select v-model="form.category" :options="['General', 'Help' ,'News', 'Discussion', 'Off-Topic']" />
+                <!-- <v-select class="logButton" v-model="form.category" :options="['General', 'Help' ,'News', 'Discussion', 'Off-Topic']" /> -->
+                <select class="logButton" v-model="form.category">
+                  <option selected="selected">General</option>
+                  <option>Help</option>
+                  <option>News</option>
+                  <option>Discussion</option>
+                  <option>Off-Topic</option>
+               </select>
             </td>
         </tr>
         <br>  
-        <textarea v-model="form.content" required></textarea>
+        <textarea class="logButton" v-model="form.content" required></textarea>
     <br>
     <p v-if="!formIsValid" class="error-message">*All the fields are required.</p>
-    <button type="button" @click="createThread()">Post new Thread</button>
+    <button class="logButton" type="button" @click="createThread()">Post new Thread</button>
     </form>
 </div>
 <div v-else id="app">

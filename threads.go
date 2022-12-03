@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -58,6 +57,5 @@ func GetRandomLaw(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "couldn't retrieve threads", http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Println(j)
 	io.Copy(w, bytes.NewReader(j))
 }
