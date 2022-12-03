@@ -19,14 +19,7 @@ margin-bottom: 0px;
 p {
     margin: 5px 0;
 }
-h4 {
-    margin: 0;
-    background-color: #F5D061;
-    padding: 10px;
-}
-h4:hover {
-    background-color: #E6AF2E;
-}
+
 #app {
     
     font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -34,13 +27,38 @@ h4:hover {
     -moz-osx-font-smoothing: grayscale;
     color: #ECECEC;
 }
-
+.thread {
+    list-style-type: none;
+    margin-top: 5px;
+    color: #282F44;
+    border-radius: 5px;
+    border: 3px solid #E6AF2E;
+    background-color: #F5D061;
+    padding:  20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
 .noAccount{
 
     width: 200px;
 }
 .bottomText{
     font-size: 12px;
+}
+.navBar{
+    display: flex;
+    margin-top: 5px;
+    color: #282F44;
+    border-radius: 5px;
+    border: 3px solid #E6AF2E;
+    background-color: #F5D061;
+    padding:  20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.ml-auto{
+    text-align: right;
+    margin-left: auto !important;
 }
 .logButton{
     border-radius: 5px;
@@ -56,10 +74,18 @@ h4:hover {
     background-color: #F5D061;
   }
 .menu{
-    
-    text-align: right;
-    margin-bottom: 5px;
     margin-top: 5px;
+    color: #282F44;
+    border-radius: 5px;
+    border: 3px solid #E6AF2E;
+    background-color: #F5D061;
+    text-align: right;
+    padding:  20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.logged {
+    text-align: left;
 }
 .top-bar {
     border-radius: 5px;
