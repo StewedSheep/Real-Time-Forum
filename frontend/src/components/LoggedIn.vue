@@ -2,12 +2,10 @@
 
      <div id="app">
       <b-navbar class="navBar" toggleable="lg" type="dark" variant="info">
-        <b-navbar-brand href="#">NavBar</b-navbar-brand>
+        <b-navbar-brand href="#">Biitch!</b-navbar-brand>
           <b-navbar-nav class="ml-auto">
            <b-nav-item-dropdown right>
-              <template #button-content>
-                <em> {{$user.current}} </em>
-              </template>
+                <em>Logged in as: {{$user.current}} </em>     
               <b-dropdown-item href="#"><router-link class="logButton" to="newThread">Create a New Thread</router-link></b-dropdown-item>
               <b-dropdown-item href="#"><router-link class="logButton" @click.native="logOut()" to="/">Log Out</router-link></b-dropdown-item>
             </b-nav-item-dropdown>

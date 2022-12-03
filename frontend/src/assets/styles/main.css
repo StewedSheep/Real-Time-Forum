@@ -38,6 +38,15 @@ p {
     padding-top: 10px;
     padding-bottom: 10px;
 }
+.threadContent {
+    border-radius: 5px;
+    border: 3px solid #E6AF2E;
+    background-color: #ECECEC;
+
+}
+.date{
+    text-align: right;
+}
 .noAccount{
 
     width: 200px;
@@ -108,16 +117,19 @@ p {
     color: blue;
 }
 .btn-group button {
+    position: relative;
+    
 background-color: #F5D061;
 border: 1px solid #E6AF2E;
 color: #282F44;
 padding: 10px 24px;
 cursor: pointer;
 float: left;
-transition-duration: 0.2s;
+transition-duration: 0.4s;
 
 }
 
+ 
 .btn-group:after {
 content: "";
 clear: both;
