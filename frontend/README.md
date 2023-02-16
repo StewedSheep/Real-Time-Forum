@@ -1,6 +1,10 @@
 # frontend
 
-## Project setup
+## Only if npm is not installed previously
+```
+sudo apt install npm
+```
+## Project setup (to download dependancies)
 ```
 npm install
 ```
