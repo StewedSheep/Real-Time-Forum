@@ -30,7 +30,7 @@ type Threads struct {
 	Content  string `json:"content,omitempty"`
 }
 
-func GetRandomLaw(w http.ResponseWriter, r *http.Request) {
+func GetAllThreads(w http.ResponseWriter, r *http.Request) {
 	threadDb, _ := sql.Open("sqlite3", "./data.db")
 	var AllThreads []Threads
 
@@ -54,6 +54,34 @@ func GetRandomLaw(w http.ResponseWriter, r *http.Request) {
 	j, err := json.Marshal(AllThreads)
 	if err != nil {
 		http.Error(w, "couldn't retrieve threads", http.StatusInternalServerError)
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	io.Copy(w, bytes.NewReader(j))
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+func GetThread(w http.ResponseWriter, r *http.Request) {
+	threadDb, _ := sql.Open("sqlite3", "./data.db")
+	//todo get idNr
+	rows, err := threadDb.Query("SELECT id, title, author, date, category, content FROM threads WHERE id='idNr' ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&id, &title, &author, &date, &category, &content)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	j, err := json.Marshal(Threads)
+	if err != nil {
+		http.Error(w, "couldn't retrieve thread", http.StatusInternalServerError)
 	}
 	
 	w.Header().Set("Content-Type", "application/json")

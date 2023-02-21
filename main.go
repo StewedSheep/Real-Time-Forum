@@ -47,10 +47,13 @@ func Handler() http.Handler {
 				ValidateRegister(w, r)
 			}
 			if strings.HasSuffix(_path, "totThread") {
-				GetRandomLaw(w, r)
+				GetAllThreads(w, r)
 			}
 			if strings.HasSuffix(_path, "threaddat") {
 				CreateThread(w, r)
+			}
+			if strings.HasSuffix(_path, "thread") {
+				GetThread(w, r)
 			}
 			if strings.HasSuffix(_path, "ws") {
 				ServeWs(wsServer, w, r)

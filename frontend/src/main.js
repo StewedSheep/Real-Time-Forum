@@ -62,6 +62,11 @@ const router = new VueRouter({
         component: RegisterView
       },
       {
+        path: '/thread',
+        name: 'thread',
+        component: ThreadView
+      },
+      {
         path: '/newThread',
         name: 'newThread',
         component: NewThreadView

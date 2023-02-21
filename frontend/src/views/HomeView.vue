@@ -24,6 +24,12 @@ export default {
             return b.id - a.id;})
             return orderedStories
         },
+        clickThread(id) {
+        console.log(id)
+        this.$router.push({ name: 'thread', params: { thrId: id } })
+        },
+
+
         liAll: function() {
             this.cate = ""
         },
@@ -41,9 +47,6 @@ export default {
         },
         liOff: function() {
             this.cate = "Off-Topic"
-        },
-        liLik: function() {
-            // this.cate = "Liked-Posts" QOTD: HOW TO FILTER LIKED POSTS 
         },
         liMyP: function() {
             this.cate = "My-Posts"
@@ -82,6 +85,7 @@ export default {
         </div>
         <div id="threadList">
                 <div class="thread" v-for="Thread in sortPOST()" :key="Thread">
+                    <div data-id=Thread.id @click="clickThread(Thread.id)">
                   <h1>{{ Thread.title }}</h1>
                   <p>Category:{{ Thread.category }} || Author:{{ Thread.author }} || Date:{{ Thread.date }} </p>
                   <p>{{ Thread.content }}</p>
