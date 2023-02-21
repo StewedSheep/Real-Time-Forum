@@ -29,7 +29,7 @@ func main() {
 func Handler() http.Handler {
 
 	handler := http.FileServer(http.Dir("frontend/dist"))
-	var wsServer = NewWebsocketServer()
+	wsServer := NewWebsocketServer()
 	go wsServer.Run()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

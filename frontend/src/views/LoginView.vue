@@ -24,6 +24,7 @@ export default {
           'Access-Control-Allow-Origin': '*'
             }
         }).then((response) => (this.LoginError = response.data));
+        if (this.LoginError == ""){this.$router.push("/")}
       },
     }
 }

@@ -31,6 +31,7 @@ func (server *WsServer) Run() {
 		case message := <-server.broadcast:
 			server.broadcastToClients(message)
 		}
+
 	}
 }
 

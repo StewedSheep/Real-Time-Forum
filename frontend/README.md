@@ -8,7 +8,7 @@ sudo apt install npm
 ```
 npm install
 ```
-### Axios and vue-axios
+### Axios and vue-axios (if for some reason they dont update with the command provided above)
 ```
 npm install axios
 npm install vue-axios
@@ -24,10 +24,7 @@ npm run serve
 npm run build
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
+### About project
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+INSERT MORE INFO HERE #!#!#!#!#!#
+After login and posting threads the code pushes the user to home page, but it does not work without actually hosting the built production

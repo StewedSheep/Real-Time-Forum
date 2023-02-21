@@ -8,11 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
-)
-
 const (
 	// Max wait time when writing message to peer
 	writeWait = 10 * time.Second
@@ -27,6 +22,16 @@ const (
 	maxMessageSize = 10000
 )
 
+var (
+	newline = []byte{'\n'}
+	space   = []byte{' '}
+)
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  4096,
+	WriteBufferSize: 4096,
+}
+
 // Client represents the websocket client at the server
 type Client struct {
 	// The actual websocket connection.
@@ -35,38 +40,18 @@ type Client struct {
 	send     chan []byte
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  4096,
-	WriteBufferSize: 4096,
-}
-
 func newClient(conn *websocket.Conn, wsServer *WsServer) *Client {
 	return &Client{
 		conn:     conn,
 		wsServer: wsServer,
-	}
-}
-
-// ServeWs handles websocket requests from clients requests.
-func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
+		send:     make(chan []byte, 256),
 	}
 
-	client := newClient(conn, wsServer)
-
-	go client.writePump()
-	go client.readPump()
-
-	wsServer.register <- client
 }
 
 func (client *Client) readPump() {
 	defer func() {
-		client.conn.Close()
+		client.disconnect()
 	}()
 
 	client.conn.SetReadLimit(maxMessageSize)
@@ -85,6 +70,7 @@ func (client *Client) readPump() {
 
 		client.wsServer.broadcast <- jsonMessage
 	}
+
 }
 
 func (client *Client) writePump() {
@@ -126,4 +112,27 @@ func (client *Client) writePump() {
 			}
 		}
 	}
+}
+
+func (client *Client) disconnect() {
+	client.wsServer.unregister <- client
+	close(client.send)
+	client.conn.Close()
+}
+
+// ServeWs handles websocket requests from clients requests.
+func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	client := newClient(conn, wsServer)
+
+	go client.writePump()
+	go client.readPump()
+
+	wsServer.register <- client
 }
