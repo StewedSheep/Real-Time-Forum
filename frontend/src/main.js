@@ -5,7 +5,7 @@ import axios from "axios";
 import VueAxios from "vue-axios";
 import VueCookies from 'vue-cookies-reactive';
 import vSelect from "vue-select";
-import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue";
+import BootstrapVue from "bootstrap-vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 
@@ -30,7 +30,6 @@ const store = Vue.observable({
 });
 
 Vue.use(BootstrapVue);
-Vue.use(BootstrapVueIcons);
 Vue.use(GlobalStores)
 Vue.component("v-select", vSelect);
 

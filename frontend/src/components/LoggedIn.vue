@@ -1,15 +1,10 @@
 <template>
 
      <div id=app>
-        <b-navbar class="navBar" toggleable="lg" type="dark" variant="info">
-        
-          <b-navbar-nav class="ml-auto">
-           <b-nav-item-dropdown right>
-                <em>Logged in as: {{$user.current}} </em>     
-              <b-dropdown-item href="#"><router-link class="logButton" to="newThread">Create a New Thread</router-link></b-dropdown-item>
-              <b-dropdown-item href="#"><router-link class="logButton" @click.native="logOut()" to="/">Log Out</router-link></b-dropdown-item>
-
      <ChatBar/>
+                <em>Logged in as: {{$user.current}} </em>     
+              <router-link class="logButton" to="newThread">Create a New Thread</router-link>
+              <router-link class="logButton" @click.native="logOut()" to="/">Log Out</router-link>
     </div>
 </template>
 
