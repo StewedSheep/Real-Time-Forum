@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"bytes"
 	"database/sql"
 	"encoding/json"
@@ -60,28 +61,45 @@ func GetAllThreads(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, bytes.NewReader(j))
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+type ThreadId struct {
+	Id string `json:"threadId"`
+}
+
 func GetThread(w http.ResponseWriter, r *http.Request) {
+	//gets data through header(POST; JSON)
+	var PostId ThreadId
+
+	err := json.NewDecoder(r.Body).Decode(&PostId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	fmt.Printf("%+v\n", PostId.Id)
+
 	threadDb, _ := sql.Open("sqlite3", "./data.db")
-	//todo get idNr
-	rows, err := threadDb.Query("SELECT id, title, author, date, category, content FROM threads WHERE id='idNr' ")
+	var AllThreads []Threads
+
+	rows, err := threadDb.Query("SELECT id, title, author, date, category, content FROM threads WHERE id = ?", PostId.Id)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		err := rows.Scan(&id, &title, &author, &date, &category, &content)
 		if err != nil {
 			log.Fatal(err)
 		}
+		AllThreads = append(AllThreads, Threads{Id: strconv.Itoa(id), Title: title, Author: author, Date: date, Category: category, Content: content})
 	}
 	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	j, err := json.Marshal(Threads)
+	j, err := json.Marshal(AllThreads)
 	if err != nil {
-		http.Error(w, "couldn't retrieve thread", http.StatusInternalServerError)
+		http.Error(w, "couldn't retrieve threads", http.StatusInternalServerError)
 	}
 	
 	w.Header().Set("Content-Type", "application/json")

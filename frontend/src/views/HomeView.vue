@@ -26,7 +26,7 @@ export default {
         },
         clickThread(id) {
         console.log(id)
-        this.$router.push({ name: 'thread', params: { thrId: id } })
+        this.$router.push({ path: '/thread', query: { id } })
         },
 
 

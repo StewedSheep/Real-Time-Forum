@@ -30,7 +30,7 @@ func LoginAuth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("%+v\n", logDat)
+	fmt.Println("%+v\n", logDat)
 
 	userDb, err = sql.Open("sqlite3", "./user.db")
 	if err != nil {
