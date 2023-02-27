@@ -28,11 +28,20 @@ export default {
 <template>
     <div id="app">
         <div id="threadList">
-                <div class="thread" v-for="Thread in Threads" :key="Thread">
-                  <h1>{{ Thread.title }}</h1>
-                  <p>Category:{{ Thread.category }} || Author:{{ Thread.author }} || Date:{{ Thread.date }} </p>
-                  <p>{{ Thread.content }}</p>
-                </div>
+          <div class="thread" v-for="Thread in Threads" :key="Thread">
+            <h1>{{ Thread.title }}</h1>
+            <P>By: {{ Thread.author }}</P>
+            <p>Category: {{ Thread.category }}</p>
+            <p class="threadContent">{{ Thread.content }}</p>
+            <p class="date">Date: {{ Thread.date }}</p>
+          
+            <div class="comments">
+            <h1>Comment</h1>
+            <p>By: urmom</p>
+            <P class="threadContent">Haha I'm a stupid comment hahah</P>
+            <p class="date">Date: Wanna Go out?</p>
+          </div>
+          </div>
         </div>
     </div>
 </template>

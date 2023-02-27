@@ -2,11 +2,12 @@
 
      <div id=app>
      <ChatBar/>
-                <em>Logged in as: {{$user.current}} </em> 
-                <b-navbar class="navBar" toggleable="lg" type="dark" variant="info">
+      <b-navbar style=" background-color: #F5D061 !important;" class="navBar" toggleable="lg" type="dark" variant="info">
         <b-navbar-brand href="#">NavBar</b-navbar-brand>
+        
           <b-navbar-nav class="ml-auto">
-           <b-nav-item-dropdown right>
+            <em class="loggedInAs">Logged in as: {{$user.current}} </em> 
+            <b-nav-item-dropdown right>
               <template #button-content>
               </template>
               <b-dropdown-item href="#"><router-link class="logButton" to="newThread">Create a New Thread</router-link></b-dropdown-item>
