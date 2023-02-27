@@ -32,6 +32,7 @@ export default {
                   <h1>{{ Thread.title }}</h1>
                   <p>Category:{{ Thread.category }} || Author:{{ Thread.author }} || Date:{{ Thread.date }} </p>
                   <p>{{ Thread.content }}</p>
+                </div>
         </div>
     </div>
 </template>
