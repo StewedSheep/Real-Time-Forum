@@ -34,7 +34,11 @@ export default {
             <p>Category: {{ Thread.category }}</p>
             <p class="threadContent">{{ Thread.content }}</p>
             <p class="date">Date: {{ Thread.date }}</p>
-          
+            <div class="comments">
+              <label for="fname">Add a comment:</label>
+              <input type="text" id="fname" name="fname"><br><br>
+              <input type="submit" value="Submit">
+            </div>
             <div class="comments">
             <h1>Comment</h1>
             <p>By: urmom</p>
