@@ -1,10 +1,10 @@
 <template>
 
      <div id=app>
-     <ChatBar/>
-      <b-navbar style=" background-color: #F5D061 !important;" class="navBar" toggleable="lg" type="dark" variant="info">
+       <b-navbar style=" background-color: #F5D061 !important;" class="navBar" toggleable="lg" type="dark" variant="info">
         <b-navbar-brand href="#">NavBar</b-navbar-brand>
         
+        <ChatBar />
           <b-navbar-nav class="ml-auto">
             <em class="loggedInAs">Logged in as: {{$user.current}} </em> 
             <b-nav-item-dropdown right>

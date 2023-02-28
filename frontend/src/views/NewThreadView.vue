@@ -47,7 +47,7 @@ export default {
 <template>
   <div v-if="$user.isAuthorised">
     <br>
-        <form>
+        <form class="thread">
         <tr><br><td>
                 <label>Thread Topic:</label><br>
             <input class="logButton" type="text" v-model="form.title" name="title" required /><br><br>
