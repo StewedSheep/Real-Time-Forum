@@ -52,6 +52,9 @@ func Handler() http.Handler {
 			if strings.HasSuffix(_path, "threaddat") {
 				CreateThread(w, r)
 			}
+			if strings.HasSuffix(_path, "commentdat") {
+				CreateComment(w, r)
+			}
 			if strings.HasSuffix(_path, "thread") {
 				GetThread(w, r)
 			}

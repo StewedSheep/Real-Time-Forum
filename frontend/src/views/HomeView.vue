@@ -84,7 +84,7 @@ export default {
             <br><br>
         </div>
         <div id="threadList">
-                <div class="thread" v-for="Thread in sortPOST()" :key="Thread">
+                <div class="thread" v-for="(Thread, idx,) in sortPOST()" :key="idx">
                     <div data-id=Thread.id @click="clickThread(Thread.id)">
                   <h1>{{ Thread.title }}</h1>
                   <p>Category:{{ Thread.category }} || Author:{{ Thread.author }} || Date:{{ Thread.date }} </p>

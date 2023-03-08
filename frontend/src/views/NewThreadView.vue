@@ -67,7 +67,7 @@ export default {
         <textarea class="logButton" v-model="form.content" required></textarea>
     <br>
     <p v-if="!formIsValid" class="error-message">*All the fields are required.</p>
-    <button class="logButton" type="button" @click="createThread()">Post new Thread</button>
+    <button class="logButton" type="button">Post new Thread</button>
     </form>
 </div>
 <div v-else id="app">
