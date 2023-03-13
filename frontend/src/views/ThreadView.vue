@@ -16,10 +16,15 @@ export default {
               author: null,
               content: null,
             },
+            componentKey: 0,
         };
     },
     mounted() {
-        //console.log("ThreadId on ThreadView:", this.$route.query.id)
+        this.getThread()
+    },
+
+     methods: {
+      getThread: function() {
         var data = {threadId: this.$route.query.id,}
         console.log("ThreadView thread id data:", data)
       Vue.axios.post('/thread', data, {
@@ -28,11 +33,9 @@ export default {
           'Access-Control-Allow-Origin': '*'
         }
         }).then((response) => (
-          //console.log("Comments:", response.data.comments),
           this.Thread = response.data));
-    
-    },
-     methods: {  createComment: function() {
+      },
+      createComment: function() {
         const formIsValid = !!this.form.content
         if (formIsValid){
           var data = {author: this.$user.current,
@@ -45,9 +48,8 @@ export default {
             headers: {
               'Content-Type': 'text/plain',
               'Access-Control-Allow-Origin': '*'
-            }
-          })} else {console.log("form is not valid")}
-      },
+            }}); this.getThread()} else {console.log("form is not valid")}
+      }
     }
 }
 </script>
@@ -67,7 +69,7 @@ export default {
               <input class="SubmitButton" type="Button" @click="createComment()" value="Submit">
             </form>
             <br>
-            <div class="commentList">
+            <div class="commentList" :key="componentKey">
               <div class="comments" v-for="(Comment, idx) in Thread.comments" :key="idx">
                 <h1>{{Comment.author}}</h1>
                 <p class="threadContent">{{ Comment.content }}</p>
