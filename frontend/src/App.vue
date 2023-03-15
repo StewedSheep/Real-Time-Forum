@@ -17,8 +17,17 @@ export default {
   data() {
     return{loggedUsername,
       componentKey: 0,
-      comp: LoggedOut,}
+      comp: LoggedOut,
+      ws: null,
+      serverUrl: "ws://localhost:8000/api/v1/ws",
+      messages: [],
+      newMessage: ""
+      }
    },
+   // connects to websocket on loading page
+       mounted: function() {
+      this.connectToWebsocket();
+    },
   //checks for cookie updates every 100ms
 created: function() {
   const timer = setInterval(() => {
@@ -33,6 +42,36 @@ created: function() {
     clearInterval(timer);
   });
 },
+
+methods: {
+      connectToWebsocket() {
+        this.ws = new WebSocket( this.serverUrl );
+        this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event) });
+        this.ws.addEventListener('message', (event) => { this.handleNewMessage(event) });
+      },
+      onWebsocketOpen() {
+        console.log("connected to WS!");        
+      },
+      handleNewMessage(event) {
+        let data = event.data;
+        data = data.split(/\r?\n/);
+
+        for (let i = 0; i < data.length; i++) {
+            let msg = JSON.parse(data[i]);
+            this.messages.push(msg);
+
+        }   
+      },
+      sendMessage() {
+        if(this.newMessage !== "") {
+          this.ws.send(JSON.stringify({message: this.newMessage}));
+          console.log(this.newMessage)
+          this.newMessage = "";
+        }
+      }
+
+    },
+
   //watches for changes in logged in username and changes components
   watch: {
     loggedUsername(newVal, oldVal) {

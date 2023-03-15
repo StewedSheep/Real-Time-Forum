@@ -166,6 +166,7 @@ func ValidateRegister(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		fmt.Println("crypted pswd (hash):", string(hash))
+		//inserts user into users database
 		var insertStmt *sql.Stmt
 		insertStmt, err = userDb.Prepare("INSERT INTO bcrypt (username, hash, email, age, gender, firstName, lastName) VALUES (?, ?, ?, ?, ?, ?, ?);")
 		if err != nil {
@@ -182,7 +183,7 @@ func ValidateRegister(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("rowsAff:", rowsAff)
 		fmt.Println("lastIns:", lastIns)
 		if err != nil {
-			regRespDat.RegisterError = "error inserting new user."
+			regRespDat.RegisterError = "error inserting new user into user db."
 			if err := json.NewEncoder(w).Encode(regRespDat.RegisterError); err != nil {
 				panic(err)
 			}

@@ -40,7 +40,7 @@ func LoginAuth(w http.ResponseWriter, r *http.Request) {
 	var hash string
 	var username string
 
-	stmt := "SELECT hash,username FROM bcrypt WHERE username = ? OR email = ?"
+	stmt := "SELECT hash, username FROM bcrypt WHERE username = ? OR email = ?"
 	row := userDb.QueryRow(stmt, logDat.Username, logDat.Username)
 	err = row.Scan(&hash, &username)
 	fmt.Println(username)
