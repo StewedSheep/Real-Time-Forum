@@ -32,7 +32,8 @@ export default {
           this.Thread = response.data));
     
     },
-     methods: {  createComment: function() {
+     methods: {  
+      createComment: function() {
         const formIsValid = !!this.form.content
         if (formIsValid){
           var data = {author: this.$user.current,
@@ -46,7 +47,10 @@ export default {
               'Content-Type': 'text/plain',
               'Access-Control-Allow-Origin': '*'
             }
-          })} else {console.log("form is not valid")}
+          })
+          // .then((response) => {
+          // this.Thread = response.data});
+        } else {console.log("form is not valid")}
       },
     }
 }
