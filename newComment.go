@@ -16,7 +16,7 @@ type CommentData struct {
 
 func CreateComment(w http.ResponseWriter, r *http.Request) {
 	var commDat CommentData
-	//var thRespDat ThreadResponse
+
 	err := json.NewDecoder(r.Body).Decode(&commDat)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

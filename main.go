@@ -53,6 +53,9 @@ func Handler() http.Handler {
 				fmt.Printf("GetAllThreads")
 				GetAllThreads(w, r)
 			}
+			if strings.HasSuffix(_path, "totUsers") {
+				GetAllUsers(w, r)
+			}
 			if strings.HasSuffix(_path, "threaddat") {
 				fmt.Printf("CreateThread")
 				CreateThread(w, r)
