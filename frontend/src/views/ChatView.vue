@@ -30,17 +30,20 @@
         <div class="container-fluid h-100">
           <div class="row justify-content-center h-100">
             <div class="col-md-8 col-xl-6 chat">
-              <div class="card">
+              <div class="card" id="chatBox">
                 <div class="card-header msg_head">
                   <div class="d-flex bd-highlight justify-content-center">Chat</div>
                 </div>
                 <div class="card-body msg_card_body">
+                
                   <div
                     v-for="(message, key) in messages"
                     :key="key"
                     class="d-flex justify-content-start mb-4"
                   >
+                
                     <div class="msg_cotainer">
+                    
                       {{ message.message }}
                       <span class="msg_time"></span>
                     </div>

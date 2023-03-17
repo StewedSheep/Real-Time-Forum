@@ -35,13 +35,18 @@ export default {
 
 <template>
   <div>
-    <b-button v-b-toggle.sidebar-right>Chat</b-button>
-    <b-sidebar id="sidebar-right" title="Sidebar" right shadow>
+    <b-button id="chatButton" v-b-toggle.sidebar-right style="margin-left: 10px;">Chat</b-button>
+    <b-sidebar class="chatBar" id="sidebar-right" title="Let's chat!" right shadow>
+      <br>
       <div class="px-3 py-2">
         <div data-id="User.id" @click="clickUser(user)">
-          <p v-for="user in Users" :key="user">
-            {{ user }}
-          </p>
+          <div  id="chatButton" v-for="user in Users" :key="user">
+            <h5 id="chatBarButton">{{ user }}</h5> 
+            <span id="chatBarButton" class="statusDot"></span>
+            <br>
+            <p id="chatBarButton">Last msg.</p>
+            <p id="chatBarButton" style="float: right;">19.03 11:11</p>
+          </div>
         </div>
       </div>
     </b-sidebar>
