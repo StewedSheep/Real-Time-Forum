@@ -53,6 +53,7 @@ export default {
           },
         });
         this.getThread();
+        this.componentKey.idx += 1;
       } else {
         console.log("form is not valid");
       }
@@ -88,7 +89,7 @@ export default {
         </form>
         <div v-else />
         <br />
-        <div class="commentList" :key="componentKey">
+        <div class="commentList">
           <div class="comments" v-for="(Comment, idx) in Thread.comments" :key="idx">
             <h1>{{ Comment.author }}</h1>
             <p class="threadContent">{{ Comment.content }}</p>
