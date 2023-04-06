@@ -2,8 +2,6 @@
 
 This project is a forum webpage (named Golden Time Forum), which has a real time chat built into it.
 
-## Built with 
-* [![Vue][Vue.js]][Vue-url]
 
 ## Installation
 
