@@ -27,7 +27,7 @@ p {
     -moz-osx-font-smoothing: grayscale;
     color: #ECECEC;
 }
-.thread, .comments, #chatBox {
+.thread, .comments, #chatBox, .notFoundPage {
     list-style-type: none;
     margin-top: 5px;
     color: #282F44;
@@ -39,13 +39,15 @@ p {
     padding-bottom: 10px;
 }
 .comments {
+    padding-top: 0px;
+    padding-bottom: 0px;
     background-color: #E6AF2E;
 }
 .threadContent {
     border-radius: 5px;
     border: 3px solid #E6AF2E;
     background-color: #ECECEC;
-
+    margin-bottom: 0px;
 }
 .date{
     text-align: right;
@@ -72,7 +74,7 @@ p {
     text-align: right;
     margin-left: auto !important;
 }
-.logButton, #chatButton, .close{
+.logButton, #chatButton, .close, .notFoundPageHomeButton{
     border-radius: 5px;
 
     background-color: #E6AF2E;
@@ -86,7 +88,7 @@ p {
     margin-left: 10px;
     padding: 5px 24px;
 }
-.logButton:hover, #chatButton:hover, .close:hover {
+.logButton:hover, #chatButton:hover, .close:hover, .notFoundPageHomeButton:hover {
     background-color: #a8861d;
   }
 .menu{
@@ -173,4 +175,4 @@ background-color: #E6AF2E;
     /* background-color: #5a5a5a; offline ja online jaoks*/
     background-color: rgb(3, 172, 3);
     border-radius: 50%;
-  } 
+  }
