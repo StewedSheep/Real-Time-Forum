@@ -9,12 +9,45 @@ export default {
       Users: [],
     };
   },
+
+  created() {
+    // this.connectToWebsocket();
+  },
   mounted() {
     Vue.axios.get("/totUsers").then((response) => (this.Users = response.data));
-    console.log(this.Users);
   },
-
   methods: {
+    connectToWebsocket() {
+      //   this.user.name = this.$user.current;
+      this.$socket.addEventListener("message", (event) => {
+        this.handleNewMessage(event);
+      });
+      this.getAllConnections();
+    },
+
+    handleNewMessage(event) {
+      let data = event.data;
+      data = data.split(/\r?\n/);
+
+      for (let i = 0; i < data.length; i++) {
+        let msg = JSON.parse(data[i]);
+        switch (msg.action) {
+          case "all-connections":
+            this.getAllConnections(msg);
+            break;
+          default:
+            break;
+        }
+      }
+    },
+    getAllConnections() {
+      console.log("got here");
+      this.$socket.send(JSON.stringify({ action: "all-connections" }));
+    },
+    handleAllConnections(msg) {
+      let connections = msg.message;
+      console.log(connections);
+    },
     // sortUsers(){
     //   let filteredUsers =  this.Users.filter((t) => {
     //     if("My-Posts"==categor){
@@ -26,8 +59,8 @@ export default {
     //     return orderedStories
     // },
     clickUser(user) {
-      console.log(user);
-      this.$router.push({ path: "/chat", query: { user } });
+      //console.log(user); logs the user
+      this.$router.push({ path: "/chat" });
     },
   },
 };
@@ -35,18 +68,19 @@ export default {
 
 <template>
   <div>
-    <b-button id="chatButton" v-b-toggle.sidebar-right style="margin-left: 10px;">Chat</b-button>
+    <b-button id="chatButton" v-b-toggle.sidebar-right style="margin-left: 10px"
+      >Chat</b-button
+    >
     <b-sidebar class="chatBar" id="sidebar-right" title="Let's chat!" right shadow>
-      <br>
+      <br />
       <div class="px-3 py-2">
-        <div data-id="User.id" @click="clickUser(user)">
-          <div  id="chatButton" v-for="user in Users" :key="user">
-            <h5 id="chatBarButton">{{ user }}</h5> 
-            <span id="chatBarButton" class="statusDot"></span>
-            <br>
-            <p id="chatBarButton">Last msg.</p>
-            <p id="chatBarButton" style="float: right;">19.03 11:11</p>
-          </div>
+        <div id="chatButton" v-for="user in Users" :key="user">
+          <h5 id="chatBarButton">{{ user }}</h5>
+          <button @click="clickUser(user)">Send Msg</button>
+          <span id="chatBarButton" class="statusDot"></span>
+          <br />
+          <p id="chatBarButton">Last msg.</p>
+          <p id="chatBarButton" style="float: right">19.03 11:11</p>
         </div>
       </div>
     </b-sidebar>

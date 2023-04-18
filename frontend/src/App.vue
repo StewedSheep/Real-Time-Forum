@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import Vue from "vue";
 import LoggedIn from "./components/LoggedIn.vue";
 import LoggedOut from "./components/LoggedOut.vue";
 import PageHeader from "./components/PageHeader.vue";
@@ -19,15 +20,19 @@ export default {
       loggedUsername,
       componentKey: 0,
       comp: LoggedOut,
-      ws: null,
+      socket: null,
       serverUrl: "ws://localhost:8000/api/v1/ws",
       messages: [],
       newMessage: "",
     };
   },
   // connects to websocket on loading page
-  mounted: function () {
-    // this.connectToWebsocket();
+  updated: function () {
+    setInterval(() => {
+      if (!this.$socket) {
+        this.connectToWebsocket();
+      }
+    }, 5000);
   },
   //checks for cookie updates every 100ms
   created: function () {
@@ -45,33 +50,16 @@ export default {
   },
 
   methods: {
-    // connectToWebsocket() {
-    //   this.ws = new WebSocket(this.serverUrl);
-    //   this.ws.addEventListener("open", (event) => {
-    //     this.onWebsocketOpen(event);
-    //   });
-    //   this.ws.addEventListener("message", (event) => {
-    //     this.handleNewMessage(event);
-    //   });
-    // },
-    // onWebsocketOpen() {
-    //   console.log("connected to WS!");
-    // },
-    // handleNewMessage(event) {
-    //   let data = event.data;
-    //   data = data.split(/\r?\n/);
-    //   for (let i = 0; i < data.length; i++) {
-    //     let msg = JSON.parse(data[i]);
-    //     this.messages.push(msg);
-    //   }
-    // },
-    // sendMessage() {
-    //   if (this.newMessage !== "") {
-    //     this.ws.send(JSON.stringify({ message: this.newMessage }));
-    //     console.log(this.newMessage);
-    //     this.newMessage = "";
-    //   }
-    // },
+    connectToWebsocket() {
+      const socket = new WebSocket(this.serverUrl + "?name=" + this.$user.current);
+      Vue.prototype.$socket = socket;
+      this.$socket.addEventListener("open", (event) => {
+        this.onWebsocketOpen(event);
+      });
+    },
+    onWebsocketOpen() {
+      console.log("connected to WS!");
+    },
   },
 
   //watches for changes in logged in username and changes components

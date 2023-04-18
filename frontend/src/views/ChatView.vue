@@ -72,8 +72,6 @@
 export default {
   data() {
     return {
-      ws: null,
-      serverUrl: "ws://localhost:8000/api/v1/ws",
       roomInput: null,
       rooms: [],
       user: {
@@ -87,17 +85,10 @@ export default {
   },
   methods: {
     connectToWebsocket() {
-      this.user.name = this.$user.current;
-      this.ws = new WebSocket(this.serverUrl + "?name=" + this.user.name);
-      this.ws.addEventListener("open", (event) => {
-        this.onWebsocketOpen(event);
-      });
-      this.ws.addEventListener("message", (event) => {
+      // this.user.name = this.$user.current;
+      this.$socket.addEventListener("message", (event) => {
         this.handleNewMessage(event);
       });
-    },
-    onWebsocketOpen() {
-      console.log("connected to WS!");
     },
 
     handleNewMessage(event) {
@@ -148,7 +139,7 @@ export default {
     },
     sendMessage(room) {
       if (room.newMessage !== "") {
-        this.ws.send(
+        this.$socket.send(
           JSON.stringify({
             action: "send-message",
             message: room.newMessage,
@@ -169,11 +160,11 @@ export default {
       }
     },
     // joinRoom() {
-    //   this.ws.send(JSON.stringify({ action: "join-room", message: this.roomInput }));
+    //   this.$socket.send(JSON.stringify({ action: "join-room", message: this.roomInput }));
     //   this.roomInput = "";
     // },
     leaveRoom(room) {
-      this.ws.send(JSON.stringify({ action: "leave-room", message: room.id }));
+      this.$socket.send(JSON.stringify({ action: "leave-room", message: room.id }));
 
       for (let i = 0; i < this.rooms.length; i++) {
         if (this.rooms[i].id === room.id) {
@@ -183,7 +174,9 @@ export default {
       }
     },
     joinPrivateRoom(room) {
-      this.ws.send(JSON.stringify({ action: "join-room-private", message: room.id }));
+      this.$socket.send(
+        JSON.stringify({ action: "join-room-private", message: room.id })
+      );
     },
   },
 };

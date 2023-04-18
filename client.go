@@ -56,6 +56,7 @@ const UserJoinedAction = "user-join"
 const UserLeftAction = "user-left"
 const JoinRoomPrivateAction = "join-room-private"
 const RoomJoinedAction = "room-joined"
+const GetAllConnections = "all-connections"
 
 type Message struct {
 	Action  string  `json:"action"`
@@ -187,12 +188,6 @@ func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
 	go client.readPump()
 
 	wsServer.register <- client
-
-	//logs all users in terminal
-	fmt.Printf("user connected through ws:")
-	for i, _ := range wsServer.clients {
-		fmt.Printf(" " + i.Name)
-	}
 }
 
 func (client *Client) handleNewMessage(jsonMessage []byte) {
@@ -220,6 +215,9 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 
 	case JoinRoomPrivateAction:
 		client.handleJoinRoomPrivateMessage(message)
+
+	case GetAllConnections:
+		client.handleAllConnections()
 	}
 
 }
@@ -256,6 +254,30 @@ func (client *Client) handleJoinRoomPrivateMessage(message Message) {
 
 	client.joinRoom(roomName, target)
 	target.joinRoom(roomName, client)
+
+}
+
+func (client *Client) handleAllConnections() {
+
+	var target = client.wsServer.findAllClients()
+
+	fmt.Println(target)
+
+	if target == nil {
+		return
+	}
+
+	message := Message{
+		//		Message: target,
+	}
+
+	client.send <- message.encode()
+
+	// // create unique room name combined to the two IDs
+	// roomName := message.Message + client.ID.String()
+
+	// client.joinRoom(roomName, target)
+	// target.joinRoom(roomName, client)
 
 }
 

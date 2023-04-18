@@ -21,6 +21,7 @@ import GlobalStores from './plugins/GlobalStores';
 
 Vue.config.productionTip = false;
 
+
 const store = Vue.observable({ 
   auth: {
     user: '',
@@ -40,8 +41,6 @@ const client = axios.create({
 
 Vue.use(VueCookies);
 Vue.use(VueAxios, client);
-
-
 
 const router = new VueRouter({
   mode: 'history',

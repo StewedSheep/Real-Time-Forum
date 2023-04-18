@@ -54,6 +54,7 @@ func Handler() http.Handler {
 				GetAllThreads(w, r)
 			}
 			if strings.HasSuffix(_path, "totUsers") {
+				fmt.Println("GetAllUsers")
 				GetAllUsers(w, r)
 			}
 			if strings.HasSuffix(_path, "threaddat") {
@@ -69,7 +70,7 @@ func Handler() http.Handler {
 				GetThread(w, r)
 			}
 			if strings.HasSuffix(_path, "ws") {
-				fmt.Println("ServeWS")
+				fmt.Println("ServeWebSocket")
 				ServeWs(wsServer, w, r)
 			}
 			return

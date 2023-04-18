@@ -76,7 +76,6 @@ func (server *WsServer) listOnlineClients(client *Client) {
 		}
 		client.send <- message.encode()
 	}
-
 }
 
 func (server *WsServer) broadcastToClients(message []byte) {
