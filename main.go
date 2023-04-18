@@ -38,38 +38,38 @@ func Handler() http.Handler {
 		//api calls
 		if strings.HasPrefix(_path, "/api/v1/") {
 			if strings.HasSuffix(_path, "login") {
-				fmt.Printf("LoginAuth")
+				fmt.Println("LoginAuth")
 				LoginAuth(w, r)
 			}
 			if strings.HasSuffix(_path, "logout") {
-				fmt.Printf("ResetCookie")
+				fmt.Println("ResetCookie")
 				ResetCookie(w, r)
 			}
 			if strings.HasSuffix(_path, "register") {
-				fmt.Printf("ValidateRegister")
+				fmt.Println("ValidateRegister")
 				ValidateRegister(w, r)
 			}
 			if strings.HasSuffix(_path, "totThread") {
-				fmt.Printf("GetAllThreads")
+				fmt.Println("GetAllThreads")
 				GetAllThreads(w, r)
 			}
 			if strings.HasSuffix(_path, "totUsers") {
 				GetAllUsers(w, r)
 			}
 			if strings.HasSuffix(_path, "threaddat") {
-				fmt.Printf("CreateThread")
+				fmt.Println("CreateThread")
 				CreateThread(w, r)
 			}
 			if strings.HasSuffix(_path, "commentdat") {
-				fmt.Printf("CreateComment")
+				fmt.Println("CreateComment")
 				CreateComment(w, r)
 			}
 			if strings.HasSuffix(_path, "thread") {
-				fmt.Printf("GetThread")
+				fmt.Println("GetThread")
 				GetThread(w, r)
 			}
 			if strings.HasSuffix(_path, "ws") {
-				fmt.Printf("ServeWS")
+				fmt.Println("ServeWS")
 				ServeWs(wsServer, w, r)
 			}
 			return
