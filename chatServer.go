@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type WsServer struct {
 	clients    map[*Client]bool
 	register   chan *Client
@@ -41,6 +43,11 @@ func (server *WsServer) registerClient(client *Client) {
 	server.notifyClientJoined(client)
 	server.listOnlineClients(client)
 	server.clients[client] = true
+	fmt.Printf("connected webosocket clients:")
+	for i, _ := range server.clients {
+		fmt.Printf(" " + i.Name)
+	}
+	fmt.Println()
 }
 
 func (server *WsServer) unregisterClient(client *Client) {
@@ -74,6 +81,7 @@ func (server *WsServer) listOnlineClients(client *Client) {
 			Action: UserJoinedAction,
 			Sender: existingClient,
 		}
+		//fmt.Println(message.Sender)
 		client.send <- message.encode()
 	}
 }

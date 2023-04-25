@@ -215,11 +215,7 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 
 	case JoinRoomPrivateAction:
 		client.handleJoinRoomPrivateMessage(message)
-
-	case GetAllConnections:
-		client.handleAllConnections()
 	}
-
 }
 
 func (client *Client) handleJoinRoomMessage(message Message) {
@@ -254,30 +250,6 @@ func (client *Client) handleJoinRoomPrivateMessage(message Message) {
 
 	client.joinRoom(roomName, target)
 	target.joinRoom(roomName, client)
-
-}
-
-func (client *Client) handleAllConnections() {
-
-	var target = client.wsServer.findAllClients()
-
-	fmt.Println(target)
-
-	if target == nil {
-		return
-	}
-
-	message := Message{
-		//		Message: target,
-	}
-
-	client.send <- message.encode()
-
-	// // create unique room name combined to the two IDs
-	// roomName := message.Message + client.ID.String()
-
-	// client.joinRoom(roomName, target)
-	// target.joinRoom(roomName, client)
 
 }
 
