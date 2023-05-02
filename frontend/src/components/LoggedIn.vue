@@ -41,6 +41,7 @@ export default {
   },
   methods: {
     logOut: function () {
+      this.$emit("logoutEvent");
       Vue.axios.post("/logout", {
         headers: {
           "Content-Type": "text/plain",

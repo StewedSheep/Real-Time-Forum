@@ -1,7 +1,7 @@
 <template>
   <div>
     <PageHeader />
-    <component v-bind:is="comp" :users="users" />
+    <component v-bind:is="comp" @logoutEvent="removeUser" :users="users" />
     <router-view />
   </div>
 </template>
@@ -37,16 +37,23 @@ export default {
 
   //checks for cookie and existing websocket, updates every 100ms
   created: function () {
-    const timer = setInterval(() => {
+    let timer = setInterval(() => {
       this.loggedUsername = document.cookie.split("::")[1];
       //sets username to global storage
       this.$user.authorised({
         username: this.loggedUsername,
       });
-      if (!this.$socket && this.$user.isAuthorised) {
+      //checks if ws connection should be open or closed
+      if (
+        (this.$socket == null && this.$user.isAuthorised) ||
+        (!this.$socket.readyState === WebSocket.OPEN && this.$user.isAuthorised)
+      ) {
         this.connectToWebsocket();
+      } else if (this.$socket.readyState === WebSocket.OPEN && !this.$user.isAuthorised) {
+        this.$socket.close();
+        this.$socket = undefined;
       }
-    }, 100);
+    }, 200);
     //destroys last check hook so new can be run
     this.$once("hook:beforeDestroy", () => {
       clearInterval(timer);
@@ -57,6 +64,9 @@ export default {
     connectToWebsocket() {
       const socket = new WebSocket(this.serverUrl + "?name=" + this.$user.current);
       Vue.prototype.$socket = socket;
+      if (this.$socket == undefined) {
+        this.$socket = socket;
+      }
       this.$socket.addEventListener("open", (event) => {
         this.onWebsocketOpen(event);
         if (this.$socket) {
@@ -102,7 +112,6 @@ export default {
     },
     handleUserJoined(msg) {
       this.users.push(msg.sender);
-      console.log(this.users);
     },
     handleUserLeft(msg) {
       for (let i = 0; i < this.users.length; i++) {
@@ -158,6 +167,9 @@ export default {
         JSON.stringify({ action: "join-room-private", message: room.id })
       );
     },
+    removeUser() {
+      this.users = [];
+    },
   },
   setup() {
     const state = reactive({
@@ -166,7 +178,7 @@ export default {
     return { state };
   },
 
-  //watches for changes in logged in username and changes components
+  //watches for changes in logged-in username
   watch: {
     loggedUsername(newVal, oldVal) {
       if (newVal != "") {
@@ -179,7 +191,6 @@ export default {
       if (oldVal != newVal) {
         this.componentKey++;
       }
-      console.log("loggedUsername watcher triggered");
     },
     immediate: true,
   },

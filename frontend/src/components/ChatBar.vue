@@ -1,6 +1,7 @@
 <script>
 import Vue from "vue";
 import { toRef } from "vue";
+import ChatBox from "./ChatBox.vue";
 
 export default {
   name: "ChatBar.vue",
@@ -12,6 +13,7 @@ export default {
   },
   data() {
     return {
+      chatBoxes: [],
       user: {
         name: "",
       },
@@ -26,14 +28,27 @@ export default {
     Vue.axios.get("/totUsers").then((response) => (this.allUsers = response.data));
   },
   methods: {
+    openChatBox(user) {
+      this.chatBoxes.push({
+        title: user,
+        visible: true,
+      });
+    },
+
+    closeChatBox(index) {
+      this.chatBoxes.splice(index, 1);
+    },
     // based on last message and then in alphabetical order
     sortUsers() {
       return this.allUsers.filter((user) => user !== this.$user.current);
     },
+
     clickUser() {
-      //console.log(user); logs the user, import "user" again
       this.$router.push({ path: "/chat" });
     },
+  },
+  components: {
+    ChatBox,
   },
 };
 </script>
@@ -49,9 +64,14 @@ export default {
         <!-- sorts user order -->
         <div id="chatButton" v-for="user in sortUsers()" :key="user">
           <h5 id="chatBarButton">{{ user }}</h5>
-          <button @click="clickUser(user)">Send Msg</button>
+          <div>
+            <button @click="openChatBox(user)">Message</button>
+          </div>
           <!-- sets online indicator -->
           <div v-for="actUser in users" :key="actUser.name">
+            <!-- <p>
+              {{ actUser.name }}
+            </p> -->
             <span
               v-if="user == actUser.name"
               id="chatBarButton"
@@ -59,6 +79,7 @@ export default {
             />
             <span v-else id="chatBarButton" class="statusDotOffline" />
           </div>
+
           <br />
           <!-- last message data -->
           <p id="chatBarButton">Last msg.</p>
@@ -66,5 +87,20 @@ export default {
         </div>
       </div>
     </b-sidebar>
+    <!-- message box containers -->
+    <div class="chat-box-container">
+      <div
+        v-for="(chatBox, index) in chatBoxes"
+        :key="index"
+        class="chat-box"
+        :class="{ visible: chatBox.visible }"
+      >
+        <ChatBox
+          :title="chatBox.title"
+          :visible="chatBox.visible"
+          @close="closeChatBox(index)"
+        />
+      </div>
+    </div>
   </div>
 </template>
