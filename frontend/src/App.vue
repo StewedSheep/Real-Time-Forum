@@ -3,12 +3,29 @@
     <PageHeader />
     <component v-bind:is="comp" @logoutEvent="removeUser" :users="users" />
     <router-view />
+    <!-- message box containers -->
+    <div class="chat-box-container">
+      <div
+        v-for="(chatBox, index) in chatBoxes"
+        :key="index"
+        class="chat-box"
+        :class="{ visible: chatBox.visible }"
+      >
+        <ChatBox
+          :title="chatBox.title"
+          :visible="chatBox.visible"
+          @close="closeChatBox(index)"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import EventBus from "@/stores/event-bus.js";
 import Vue from "vue";
 import { reactive } from "vue";
+import ChatBox from "./components/ChatBox.vue";
 import LoggedIn from "./components/LoggedIn.vue";
 import LoggedOut from "./components/LoggedOut.vue";
 import PageHeader from "./components/PageHeader.vue";
@@ -26,8 +43,8 @@ export default {
       messages: [],
       newMessage: "",
       //websocket data here on out
+      chatBoxes: [],
       roomInput: null,
-      rooms: [],
       user: {
         name: "",
       },
@@ -57,6 +74,17 @@ export default {
     //destroys last check hook so new can be run
     this.$once("hook:beforeDestroy", () => {
       clearInterval(timer);
+    });
+  },
+
+  mounted() {
+    EventBus.$on("chatbox-opened", (eventData) => {
+      for (let i = 0; i < this.users.length; i++) {
+        if (this.users[i].name == eventData) {
+          console.log("attempting to open chat with ", this.users[i]);
+          this.joinPrivateRoom(this.users[i]);
+        }
+      }
     });
   },
 
@@ -105,9 +133,9 @@ export default {
       }
     },
     handleChatMessage(msg) {
-      const room = this.findRoom(msg.target.id);
-      if (typeof room !== "undefined") {
-        room.messages.push(msg);
+      const chatBox = this.findRoom(msg.target.id);
+      if (typeof chatBox !== "undefined") {
+        chatBox.messages.push(msg);
       }
     },
     handleUserJoined(msg) {
@@ -121,30 +149,30 @@ export default {
       }
     },
     handleRoomJoined(msg) {
-      let room = msg.target;
-      room.name = room.private ? msg.sender.name : room.name;
-      room["messages"] = [];
-      this.rooms.push(room);
+      let chatBox = msg.target;
+      chatBox.name = chatBox.private ? msg.sender.name : chatBox.name;
+      chatBox["messages"] = [];
+      this.chatBoxes.push(chatBox);
     },
-    sendMessage(room) {
-      if (room.newMessage !== "") {
+    sendMessage(chatBox) {
+      if (chatBox.newMessage !== "") {
         this.$socket.send(
           JSON.stringify({
             action: "send-message",
-            message: room.newMessage,
+            message: chatBox.newMessage,
             target: {
-              id: room.id,
-              name: room.name,
+              id: chatBox.id,
+              name: chatBox.name,
             },
           })
         );
-        room.newMessage = "";
+        chatBox.newMessage = "";
       }
     },
     findRoom(roomId) {
-      for (let i = 0; i < this.rooms.length; i++) {
-        if (this.rooms[i].id === roomId) {
-          return this.rooms[i];
+      for (let i = 0; i < this.chatBoxes.length; i++) {
+        if (this.chatBoxes[i].id === roomId) {
+          return this.chatBoxes[i];
         }
       }
     },
@@ -152,23 +180,26 @@ export default {
       this.$socket.send(JSON.stringify({ action: "join-room", message: this.roomInput }));
       this.roomInput = "";
     },
-    leaveRoom(room) {
-      this.$socket.send(JSON.stringify({ action: "leave-room", message: room.id }));
+    leaveRoom(chatBox) {
+      this.$socket.send(JSON.stringify({ action: "leave-room", message: chatBox.id }));
 
-      for (let i = 0; i < this.rooms.length; i++) {
-        if (this.rooms[i].id === room.id) {
-          this.rooms.splice(i, 1);
+      for (let i = 0; i < this.chatBoxes.length; i++) {
+        if (this.chatBoxes[i].id === chatBox.id) {
+          this.chatBoxes.splice(i, 1);
           break;
         }
       }
     },
-    joinPrivateRoom(room) {
+    joinPrivateRoom(chatBox) {
       this.$socket.send(
-        JSON.stringify({ action: "join-room-private", message: room.id })
+        JSON.stringify({ action: "join-room-private", message: chatBox.id })
       );
     },
     removeUser() {
       this.users = [];
+    },
+    closeChatBox(index) {
+      this.chatBoxes.splice(index, 1);
     },
   },
   setup() {
@@ -199,6 +230,7 @@ export default {
     PageHeader: PageHeader,
     LoggedIn: LoggedIn,
     LoggedOut: LoggedOut,
+    ChatBox,
   },
 };
 </script>

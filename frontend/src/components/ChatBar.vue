@@ -1,7 +1,7 @@
 <script>
+import EventBus from "@/stores/event-bus.js";
 import Vue from "vue";
 import { toRef } from "vue";
-import ChatBox from "./ChatBox.vue";
 
 export default {
   name: "ChatBar.vue",
@@ -13,7 +13,6 @@ export default {
   },
   data() {
     return {
-      chatBoxes: [],
       user: {
         name: "",
       },
@@ -29,15 +28,9 @@ export default {
   },
   methods: {
     openChatBox(user) {
-      this.chatBoxes.push({
-        title: user,
-        visible: true,
-      });
+      EventBus.$emit("chatbox-opened", user);
     },
 
-    closeChatBox(index) {
-      this.chatBoxes.splice(index, 1);
-    },
     // based on last message and then in alphabetical order
     sortUsers() {
       return this.allUsers.filter((user) => user !== this.$user.current);
@@ -46,9 +39,6 @@ export default {
     clickUser() {
       this.$router.push({ path: "/chat" });
     },
-  },
-  components: {
-    ChatBox,
   },
 };
 </script>
@@ -67,6 +57,7 @@ export default {
           <div>
             <button @click="openChatBox(user)">Message</button>
           </div>
+
           <!-- sets online indicator -->
           <div v-for="actUser in users" :key="actUser.name">
             <!-- <p>
@@ -79,28 +70,13 @@ export default {
             />
             <span v-else id="chatBarButton" class="statusDotOffline" />
           </div>
-
           <br />
+
           <!-- last message data -->
           <p id="chatBarButton">Last msg.</p>
           <p id="chatBarButton" style="float: right">19.03 11:11</p>
         </div>
       </div>
     </b-sidebar>
-    <!-- message box containers -->
-    <div class="chat-box-container">
-      <div
-        v-for="(chatBox, index) in chatBoxes"
-        :key="index"
-        class="chat-box"
-        :class="{ visible: chatBox.visible }"
-      >
-        <ChatBox
-          :title="chatBox.title"
-          :visible="chatBox.visible"
-          @close="closeChatBox(index)"
-        />
-      </div>
-    </div>
   </div>
 </template>
