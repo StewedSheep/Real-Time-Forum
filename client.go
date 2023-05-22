@@ -32,8 +32,12 @@ var (
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  4096,
-	WriteBufferSize: 4096,
+	ReadBufferSize:    4096,
+	WriteBufferSize:   4096,
+	EnableCompression: true,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 // Client represents the websocket client at the server
@@ -203,24 +207,29 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 	switch message.Action {
 	case SendMessageAction:
 		roomID := message.Target.GetId()
+		fmt.Println("RoomID:", roomID)
+		fmt.Println("Message:", message)
 		if room := client.wsServer.findRoomByID(roomID); room != nil {
+			fmt.Println("Room:", room)
 			room.broadcast <- &message
 		}
 
 	case JoinRoomAction:
+		fmt.Println("Message:", message)
 		client.handleJoinRoomMessage(message)
 
 	case LeaveRoomAction:
+		fmt.Println("Message:", message)
 		client.handleLeaveRoomMessage(message)
 
 	case JoinRoomPrivateAction:
+		fmt.Println("Message:", message)
 		client.handleJoinRoomPrivateMessage(message)
 	}
 }
 
 func (client *Client) handleJoinRoomMessage(message Message) {
 	roomName := message.Message
-
 	client.joinRoom(roomName, nil)
 }
 

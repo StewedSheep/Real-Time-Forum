@@ -4,7 +4,7 @@
     <component v-bind:is="comp" @logoutEvent="removeUser" :users="users" />
     <router-view />
     <!-- message box containers -->
-    <div class="chat-box-container">
+    <!-- <div class="chat-box-container">
       <div
         v-for="(chatBox, index) in chatBoxes"
         :key="index"
@@ -17,7 +17,7 @@
           @close="closeChatBox(index)"
         />
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -82,7 +82,7 @@ export default {
       for (let i = 0; i < this.users.length; i++) {
         if (this.users[i].name == eventData) {
           console.log("attempting to open chat with ", this.users[i]);
-          this.joinPrivateRoom(this.users[i]);
+          this.joinRoom(this.users[i]);
         }
       }
     });
@@ -127,6 +127,9 @@ export default {
           case "room-joined":
             this.handleRoomJoined(msg);
             break;
+          case "join-room-private":
+            this.joinPrivateRoom(msg);
+            break;
           default:
             break;
         }
@@ -159,7 +162,7 @@ export default {
         this.$socket.send(
           JSON.stringify({
             action: "send-message",
-            message: chatBox.newMessage,
+            message: this.newMessage,
             target: {
               id: chatBox.id,
               name: chatBox.name,

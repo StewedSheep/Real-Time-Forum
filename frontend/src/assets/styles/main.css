@@ -191,6 +191,9 @@ background-color: #E6AF2E;
     right: 320px;
     display: flex;
     flex-direction: row-reverse;
+    width: 18rem;
+    border-radius: 5px;
+    box-shadow: 0px 0px 50px black !important;
   }
   
   .chat-box {
@@ -198,7 +201,7 @@ background-color: #E6AF2E;
     right: 20px;
     width: 300px;
     background-color: #fff;
-    border: 1px solid #ddd;
+    border: 2px solid #282F44;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     font-family: sans-serif;
@@ -220,7 +223,6 @@ background-color: #E6AF2E;
     max-height: 300px;
     overflow-y: auto;
     padding: 10px;
-    background-color: #f9f9f9;
   }
   
   .chat-box.visible {

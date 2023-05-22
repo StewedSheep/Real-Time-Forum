@@ -2,6 +2,7 @@
 import EventBus from "@/stores/event-bus.js";
 import Vue from "vue";
 import { toRef } from "vue";
+import ChatBox from "./ChatBox.vue";
 
 export default {
   name: "ChatBar.vue",
@@ -17,6 +18,7 @@ export default {
         name: "",
       },
       allUsers: [],
+      chatBoxes: [],
     };
   },
   setup(props) {
@@ -28,7 +30,14 @@ export default {
   },
   methods: {
     openChatBox(user) {
+      this.chatBoxes.push({
+        title: user,
+        visible: true,
+      });
       EventBus.$emit("chatbox-opened", user);
+    },
+    closeChatBox(index) {
+      this.chatBoxes.splice(index, 1);
     },
 
     // based on last message and then in alphabetical order
@@ -39,6 +48,9 @@ export default {
     clickUser() {
       this.$router.push({ path: "/chat" });
     },
+  },
+  components: {
+    ChatBox,
   },
 };
 </script>
@@ -52,17 +64,13 @@ export default {
       <br />
       <div class="px-3 py-2">
         <!-- sorts user order -->
-        <div id="chatButton" v-for="user in sortUsers()" :key="user">
+        <div id="chatButton" v-for="user in sortUsers()" :key="user" @click="openChatBox(user)">
           <h5 id="chatBarButton">{{ user }}</h5>
-          <div>
-            <button @click="openChatBox(user)">Message</button>
-          </div>
-
           <!-- sets online indicator -->
           <div v-for="actUser in users" :key="actUser.name">
-            <!-- <p>
-              {{ actUser.name }}
-            </p> -->
+            <!--<p>
+            {{ actUser.name }}
+            </p>-->
             <span
               v-if="user == actUser.name"
               id="chatBarButton"
@@ -76,6 +84,21 @@ export default {
           <p id="chatBarButton">Last msg.</p>
           <p id="chatBarButton" style="float: right">19.03 11:11</p>
         </div>
+            <!-- message box containers -->
+    <div class="chat-box-container">
+      <div
+        v-for="(chatBox, index) in chatBoxes"
+        :key="index"
+        class="chat-box"
+        :class="{ visible: chatBox.visible }"
+      >
+        <ChatBox
+          :title="chatBox.title"
+          :visible="chatBox.visible"
+          @close="closeChatBox(index)"
+        />
+      </div>
+    </div>
       </div>
     </b-sidebar>
   </div>
