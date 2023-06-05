@@ -3,27 +3,13 @@
     <PageHeader />
     <component v-bind:is="comp" @logoutEvent="removeUser" :users="users" />
     <router-view />
-    <!-- message box containers -->
-    <!-- <div class="chat-box-container">
-      <div
-        v-for="(chatBox, index) in chatBoxes"
-        :key="index"
-        class="chat-box"
-        :class="{ visible: chatBox.visible }"
-      >
-        <ChatBox
-          :title="chatBox.title"
-          :visible="chatBox.visible"
-          @close="closeChatBox(index)"
-        />
-      </div>
-    </div> -->
   </div>
 </template>
 
 <script>
-import EventBus from "@/stores/event-bus.js";
 import Vue from "vue";
+import VueNativeSock from 'vue-native-websocket'
+//import EventBus from "@/stores/event-bus.js";
 import { reactive } from "vue";
 import ChatBox from "./components/ChatBox.vue";
 import LoggedIn from "./components/LoggedIn.vue";
@@ -40,9 +26,11 @@ export default {
       comp: LoggedOut,
       socket: null,
       serverUrl: "ws://localhost:8000/api/v1/ws",
-      messages: [],
       newMessage: "",
       //websocket data here on out
+      recipient: '',
+      message: '',
+      messages: [],
       chatBoxes: [],
       roomInput: null,
       user: {
@@ -75,135 +63,157 @@ export default {
     this.$once("hook:beforeDestroy", () => {
       clearInterval(timer);
     });
+
+    this.$socket.onerror = (error) => {
+      console.log(`WebSocket error: ${error}`);
+    };
+
+    this.$socket.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+    
+  },
+  sockets: {
+    onmessage(data) {
+      this.messages.push(data.data);
+    },
+  },
+  beforeDestroy() {
+    if (this.socket) {
+      this.socket.close();
+    }
   },
 
   mounted() {
-    EventBus.$on("chatbox-opened", (eventData) => {
-      for (let i = 0; i < this.users.length; i++) {
-        if (this.users[i].name == eventData) {
-          console.log("attempting to open chat with ", this.users[i]);
-          this.joinRoom(this.users[i]);
-        }
-      }
-    });
+    // EventBus.$on("chatbox-opened", (eventData) => {
+    //   for (let i = 0; i < this.users.length; i++) {
+    //     if (this.users[i].name == eventData) {
+    //       console.log("attempting to open chat with ", this.users[i].name);
+    //       this.joinRoom(this.users[i]);
+    //     }
+    //   }
+    // });
   },
 
   methods: {
+    
     connectToWebsocket() {
-      const socket = new WebSocket(this.serverUrl + "?name=" + this.$user.current);
-      Vue.prototype.$socket = socket;
-      if (this.$socket == undefined) {
-        this.$socket = socket;
-      }
-      this.$socket.addEventListener("open", (event) => {
-        this.onWebsocketOpen(event);
-        if (this.$socket) {
-          console.log("event listener open");
-          this.$socket.addEventListener("message", (event) => {
-            this.handleNewMessage(event);
-          });
-        }
-      });
+      Vue.use(VueNativeSock, this.serverUrl + `?username=${this.$user.current}`, {
+  format: 'json',
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 3000,
+})
     },
-    onWebsocketOpen() {
-      console.log("connected to WS!");
-    },
-    handleNewMessage(event) {
-      let data = event.data;
-      data = data.split(/\r?\n/);
+    //   this.$socket.addEventListener("open", (event) => {
+    //     this.onWebsocketOpen(event);
+    //     if (this.$socket) {
+    //       console.log("event listener open");
+    //       this.$socket.addEventListener("message", (event) => {
+    //         this.handleNewMessage(event);
+    //       });
+    //     }
+    //   });
+    // },
+    // onWebsocketOpen() {
+    //   console.log("connected to WS!");
+    // },
+    // handleNewMessage(event) {
+    //   let data = event.data;
+    //   data = data.split(/\r?\n/);
 
-      for (let i = 0; i < data.length; i++) {
-        let msg = JSON.parse(data[i]);
-        switch (msg.action) {
-          case "send-message":
-            this.handleChatMessage(msg);
-            break;
-          case "user-join":
-            this.handleUserJoined(msg);
-            break;
-          case "user-left":
-            this.handleUserLeft(msg);
-            break;
-          case "room-joined":
-            this.handleRoomJoined(msg);
-            break;
-          case "join-room-private":
-            this.joinPrivateRoom(msg);
-            break;
-          default:
-            break;
-        }
-      }
-    },
-    handleChatMessage(msg) {
-      const chatBox = this.findRoom(msg.target.id);
-      if (typeof chatBox !== "undefined") {
-        chatBox.messages.push(msg);
-      }
-    },
-    handleUserJoined(msg) {
-      this.users.push(msg.sender);
-    },
-    handleUserLeft(msg) {
-      for (let i = 0; i < this.users.length; i++) {
-        if (this.users[i].id == msg.sender.id) {
-          this.users.splice(i, 1);
-        }
-      }
-    },
-    handleRoomJoined(msg) {
-      let chatBox = msg.target;
-      chatBox.name = chatBox.private ? msg.sender.name : chatBox.name;
-      chatBox["messages"] = [];
-      this.chatBoxes.push(chatBox);
-    },
-    sendMessage(chatBox) {
-      if (chatBox.newMessage !== "") {
-        this.$socket.send(
-          JSON.stringify({
-            action: "send-message",
-            message: this.newMessage,
-            target: {
-              id: chatBox.id,
-              name: chatBox.name,
-            },
-          })
-        );
-        chatBox.newMessage = "";
-      }
-    },
-    findRoom(roomId) {
-      for (let i = 0; i < this.chatBoxes.length; i++) {
-        if (this.chatBoxes[i].id === roomId) {
-          return this.chatBoxes[i];
-        }
-      }
-    },
-    joinRoom() {
-      this.$socket.send(JSON.stringify({ action: "join-room", message: this.roomInput }));
-      this.roomInput = "";
-    },
-    leaveRoom(chatBox) {
-      this.$socket.send(JSON.stringify({ action: "leave-room", message: chatBox.id }));
+    //   for (let i = 0; i < data.length; i++) {
+    //     let msg = JSON.parse(data[i]);
+    //     switch (msg.action) {
+    //       case "send-message":
+    //         this.handleChatMessage(msg);
+    //         break;
+    //       case "user-join":
+    //         this.handleUserJoined(msg);
+    //         break;
+    //       case "user-left":
+    //         this.handleUserLeft(msg);
+    //         break;
+    //       case "room-joined":
+    //         this.handleRoomJoined(msg);
+    //         break;
+    //       case "join-room-private":
+    //         this.joinPrivateRoom(msg);
+    //         break;
+    //       default:
+    //         break;
+    //     }
+    //   }
+    // },
+    // handleChatMessage(msg) {
+    //   const chatBox = this.findRoom(msg.target.id);
+    //   if (typeof chatBox !== "undefined") {
+    //     chatBox.messages.push(msg);
+    //   }
+    // },
+    // handleUserJoined(msg) {
+    //   this.users.push(msg.sender);
+    // },
+    // handleUserLeft(msg) {
+    //   for (let i = 0; i < this.users.length; i++) {
+    //     if (this.users[i].id == msg.sender.id) {
+    //       this.users.splice(i, 1);
+    //     }
+    //   }
+    // },
+    // handleRoomJoined(msg) {
+    //   let chatBox = msg.target;
+    //   chatBox.name = chatBox.private ? msg.sender.name : chatBox.name;
+    //   chatBox["messages"] = [];
+    //   this.chatBoxes.push(chatBox);
+    // },
+    // sendMessage(chatBox) {
+    //   if (chatBox.newMessage !== "") {
+    //     this.$socket.send(
+    //       JSON.stringify({
+    //         action: "send-message",
+    //         message: this.newMessage,
+    //         target: {
+    //           id: chatBox.id,
+    //           name: chatBox.name,
+    //         },
+    //       })
+    //     );
+    //     chatBox.newMessage = "";
+    //   }
+    // },
+    // findRoom(roomId) {
+    //   for (let i = 0; i < this.chatBoxes.length; i++) {
+    //     if (this.chatBoxes[i].id === roomId) {
+    //       return this.chatBoxes[i];
+    //     }
+    //   }
+    // },
+    // joinRoom() {
+    //   this.$socket.send(JSON.stringify({ action: "join-room", message: this.roomInput }));
+    //   this.roomInput = "";
+    // },
+    // leaveRoom(chatBox) {
+    //   this.$socket.send(JSON.stringify({ action: "leave-room", message: chatBox.id }));
 
-      for (let i = 0; i < this.chatBoxes.length; i++) {
-        if (this.chatBoxes[i].id === chatBox.id) {
-          this.chatBoxes.splice(i, 1);
-          break;
-        }
-      }
-    },
-    joinPrivateRoom(chatBox) {
-      this.$socket.send(
-        JSON.stringify({ action: "join-room-private", message: chatBox.id })
-      );
-    },
-    removeUser() {
-      this.users = [];
-    },
-    closeChatBox(index) {
-      this.chatBoxes.splice(index, 1);
-    },
+    //   for (let i = 0; i < this.chatBoxes.length; i++) {
+    //     if (this.chatBoxes[i].id === chatBox.id) {
+    //       this.chatBoxes.splice(i, 1);
+    //       break;
+    //     }
+    //   }
+    // },
+    // joinPrivateRoom(chatBox) {
+    //   this.$socket.send(
+    //     JSON.stringify({ action: "join-room-private", message: chatBox.id })
+    //   );
+    // },
+    // removeUser() {
+    //   this.users = [];
+    // },
+    // closeChatBox(index) {
+    //   this.chatBoxes.splice(index, 1);
+    // },
   },
   setup() {
     const state = reactive({

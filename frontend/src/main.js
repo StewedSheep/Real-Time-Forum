@@ -33,6 +33,7 @@ const store = Vue.observable({
 
 Vue.use(BootstrapVue);
 Vue.use(GlobalStores)
+
 Vue.component("v-select", vSelect);
 
 const client = axios.create({

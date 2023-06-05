@@ -16,6 +16,7 @@
     "vue-axios": "^3.5.2",
     "vue-cookies": "^1.8.1",
     "vue-cookies-reactive": "^2.1.1",
+    "vue-native-websocket": "^2.0.15",
     "vue-router": "2.7",
     "vue-select": "^3.20.0"
   },

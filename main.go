@@ -14,6 +14,7 @@ var frontend embed.FS
 func main() {
 
 	StartDb()
+	go Echo()
 
 	server := &http.Server{
 		Addr:    ":" + "8000",
@@ -29,8 +30,6 @@ func main() {
 func Handler() http.Handler {
 
 	handler := http.FileServer(http.Dir("frontend/dist"))
-	wsServer := NewWebsocketServer()
-	go wsServer.Run()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_path := r.URL.Path
@@ -71,7 +70,7 @@ func Handler() http.Handler {
 			}
 			if strings.HasSuffix(_path, "ws") {
 				fmt.Println("ServeWebSocket")
-				ServeWs(wsServer, w, r)
+				WsHandler(w, r)
 			}
 			return
 		}

@@ -30,6 +30,7 @@ export default {
   },
   methods: {
     openChatBox(user) {
+      console.log(user)
       this.chatBoxes.push({
         title: user,
         visible: true,
@@ -43,10 +44,6 @@ export default {
     // based on last message and then in alphabetical order
     sortUsers() {
       return this.allUsers.filter((user) => user !== this.$user.current);
-    },
-
-    clickUser() {
-      this.$router.push({ path: "/chat" });
     },
   },
   components: {
@@ -67,17 +64,17 @@ export default {
         <div id="chatButton" v-for="user in sortUsers()" :key="user" @click="openChatBox(user)">
           <h5 id="chatBarButton">{{ user }}</h5>
           <!-- sets online indicator -->
-          <div v-for="actUser in users" :key="actUser.name">
-            <!--<p>
+          <!-- <div v-for="actUser in users" :key="actUser.name">
+            <p>
             {{ actUser.name }}
-            </p>-->
+            </p>
             <span
               v-if="user == actUser.name"
               id="chatBarButton"
               class="statusDotOnline"
             />
             <span v-else id="chatBarButton" class="statusDotOffline" />
-          </div>
+          </div> -->
           <br />
 
           <!-- last message data -->

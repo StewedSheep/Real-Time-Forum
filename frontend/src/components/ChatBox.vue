@@ -8,29 +8,22 @@
       <!-- Chat content goes here -->
       <div v-for="chatBox in chatBoxes" :key="chatBox.id">
          <!-- Only display messages when the chatbox is open -->
-        <div v-if="chatBox.id === targetId">
-          <div
-            v-for="(message, index) in chatBox.messages" :key="index"
-            v-show="message.recip == title"
-            :class="{'sent-message': message.author !== title, 'received-message': message.author == title}"
-            class="message"
-          >
-            {{ message.author }}: {{ message.message }}
-          </div>
-        </div>
+         <div v-for="msg in messages" :key="msg.from + msg.content">
+      <b>{{ msg.from }}</b> to <i>{{ msg.to }}</i>: {{ msg.content }}
+    </div>
       </div>
     </div>
     <div class="card-footer">
       <input
-        v-model="this.newMessage"
+        v-model="message"
         class="messageTextArea"
         name=""
         placeholder="Type your message..."
-        @keyup.enter.exact="sendMessage(chatBox)"
+        @keyup.enter.exact="sendMessage()"
       >
       <button 
         class="logButton input-group-append" 
-        @click="sendMessage(chatBox)"
+        @click="sendMessage()"
       >Send</button>
     </div>
   </div>
@@ -48,14 +41,12 @@ export default {
         id: "",
         messages: [],
         name: "",
-        private: true,
       },
-      message: {
-        author: "",
-        recip: "",
-        message: "",
-        date: "",
-      },
+      // // message: {
+      // //   to: "",
+      // //   from: "",
+      // //   content: "",
+      // // },
       newMessage: "",
       users: [],
       user: {
@@ -63,6 +54,9 @@ export default {
         name: "",
       },
       targetId: "",
+      recipient: '',
+      message: '',
+      messages: [],
     };
   },
   props: {
@@ -75,100 +69,38 @@ export default {
       default: true,
     },
   },
-  mounted: function () {
-    this.connectToWebsocket();
-  },
+
+  created() {
+
+    this.$socket.onmessage = (event) => {
+      console.log('Received data from server: ', event.data);
+  try {
+    const data = JSON.parse(event.data);
+    this.messages.push(data);
+  } catch (error) {
+    console.error('Error parsing message data:', error);
+  }
+};
+
+    this.$socket.onerror = (error) => {
+      console.log(`WebSocket error: ${error}`);
+    };
+
+   },
+
   methods: {
-    connectToWebsocket() {
-      if (this.$socket) {
-        console.log("event listener open");
-        this.$socket.addEventListener("message", (event) => {
-          //console.log("HandlingnewMessage, event:", event)
-          this.handleNewMessage(event);
-        });
-      }
+
+    sockets: {
+    onmessage(data) {
+      console.log("recived, ", data)
     },
+  },
+
     close() {
       this.$emit("close");
     },
     
-    handleNewMessage(event) {
-      this.joinPrivateRoom()
-      console.log("Handling new event message")
-      let data = event.data;
-      data = data.split(/\r?\n/);
-
-      for (let i = 0; i < data.length; i++) {
-        let msg = JSON.parse(data[i]);
-        console.log("msg:", msg);
-          // Check if the 'sender' property is present and has a value
-    if (msg.sender) {
-      console.log("Sender:", msg.sender);
-    } else {
-      console.log("Sender is null or undefined");
-    }
-        switch (msg.action) {
-          case "send-message":
-            console.log("Case: Send-message");
-            this.handleChatMessage(msg);
-            break;
-          case "user-join":
-            console.log("Case: user-join");
-            this.handleUserJoined(msg);
-            break;
-          case "user-left":
-            console.log("Case: user-left");
-            this.handleUserLeft(msg);
-            break;
-          case "room-joined":
-            console.log("Case: room-joined");
-            this.handleRoomJoined(msg);
-            break;
-          case "join-room-private":
-            this.joinPrivateRoom(msg);
-            break;
-          default:
-          console.log("No case msg:",msg); 
-            break;
-        }
-      }
-    },
-    handleChatMessage(msg) {
-      const chatBox = this.findRoom(msg.target.id);
-      console.log("Msg Target id:", msg.target.id, "Message Target name:", msg.target.name)
-      if (typeof chatBox !== "undefined") {
-        chatBox.messages.push({
-        recip: this.title,
-        author: msg.sender.name,
-        message: msg.message,
-    });
-      }
-      console.log("ChatBoxes!", this.chatBoxes)
-      //console.log("chatBox:", chatBox,"\n ChatBox's name:", chatBox.name, "\n Target Chatbox id:", this.targetId, "\n Newmessage:", chatBox.newMessage)
-      console.log("ChatBox messages after push:", chatBox.messages)
-    },
-    handleUserJoined(msg) {
-      console.log("msg.sender:", msg.sender);
-      this.users.push(msg.sender);
-    },
-    handleUserLeft(msg) {
-      for (let i = 0; i < this.users.length; i++) {
-        if (this.users[i].id == msg.sender.id) {
-          this.users.splice(i, 1);
-        }
-      }
-    },
-    handleRoomJoined(msg) {
-      console.log("ChatBoxes", this.chatBoxes)
-      let chatBox = msg.target;
-      chatBox.name = chatBox.private ? msg.sender.name : chatBox.name;
-      chatBox.id = msg.target.id;
-      //console.log("Room id?", chatBox.id,)
-      chatBox["messages"] = [];
-      this.chatBoxes.push(chatBox);
-      this.targetId = chatBox.id
-      console.log("roomJoined chatbox:", chatBox)
-    },
+ 
     loadMessages(chatBox) {
     // Replace this with your actual API call to fetch messages from the server
     // You'll need to adjust the endpoint and request parameters based on your server implementation
@@ -181,52 +113,18 @@ export default {
         console.error('Failed to load messages:', error);
       });
     },
-    sendMessage(chatBox) {
-      // console.log("chatBox.messages:", chatBox.message)
-       
-      //console.log("yuyi", this.targetId)
-      if (chatBox.newMessage !== "") {
-        console.log("chatBox:", chatBox,"\n ChatBox's name:", chatBox.name, "\n Target Chatbox id:", this.targetId, "\n Newmessage:", chatBox.newMessage)
+    sendMessage() {
+      if (this.$socket && this.$socket.readyState === WebSocket.OPEN) {
+      if (this.message !== "") {
+        console.log(this.title, this.$user.current, this.message)
           this.$socket.send(
-            JSON.stringify({ 
-              action: "send-message", 
-              message: this.newMessage, 
-              target: { 
-                id: chatBox.id,
-                name: chatBox.title
-              }
-          })
-        
+            JSON.stringify({to: this.title, content: this.message})
         );
-        chatBox.newMessage = "";
-      }
-    },
-    findRoom(roomId) {
-      for (let i = 0; i < this.chatBoxes.length; i++) {
-        if (this.chatBoxes[i].id === roomId) {
-          return this.chatBoxes[i];
+        this.message = "";
+      }else {
+        console.log('Unable to send message. The WebSocket connection is not open or no input.');
         }
       }
-    },
-    
-    joinRoom() {
-      this.$socket.send(JSON.stringify({ action: "join-room", message: this.roomInput }));
-      this.roomInput = "";
-    },
-    leaveRoom(chatBox) {
-      this.$socket.send(JSON.stringify({ action: "leave-room", message: chatBox.id }));
-
-      for (let i = 0; i < this.chatBoxes.length; i++) {
-        if (this.chatBoxes[i].id === chatBox.id) {
-          this.chatBoxes.splice(i, 1);
-          break;
-        }
-      }
-    },
-    joinPrivateRoom(chatBox) {
-      this.$socket.send(
-        JSON.stringify({ action: "join-room-private", message: chatBox.id })
-      );
     },
   },
 };
