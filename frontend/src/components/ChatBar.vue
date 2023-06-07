@@ -30,7 +30,7 @@ export default {
   },
   methods: {
     openChatBox(user) {
-      console.log(user)
+      console.log(user);
       this.chatBoxes.push({
         title: user,
         visible: true,
@@ -61,7 +61,12 @@ export default {
       <br />
       <div class="px-3 py-2">
         <!-- sorts user order -->
-        <div id="chatButton" v-for="user in sortUsers()" :key="user" @click="openChatBox(user)">
+        <div
+          id="chatButton"
+          v-for="user in sortUsers()"
+          :key="user"
+          @click="openChatBox(user)"
+        >
           <h5 id="chatBarButton">{{ user }}</h5>
           <!-- sets online indicator -->
           <!-- <div v-for="actUser in users" :key="actUser.name">
@@ -81,21 +86,21 @@ export default {
           <p id="chatBarButton">Last msg.</p>
           <p id="chatBarButton" style="float: right">19.03 11:11</p>
         </div>
-            <!-- message box containers -->
-    <div class="chat-box-container">
-      <div
-        v-for="(chatBox, index) in chatBoxes"
-        :key="index"
-        class="chat-box"
-        :class="{ visible: chatBox.visible }"
-      >
-        <ChatBox
-          :title="chatBox.title"
-          :visible="chatBox.visible"
-          @close="closeChatBox(index)"
-        />
-      </div>
-    </div>
+        <!-- message box containers -->
+        <div class="chat-box-container">
+          <div
+            v-for="(chatBox, index) in chatBoxes"
+            :key="index"
+            class="chat-box"
+            :class="{ visible: chatBox.visible }"
+          >
+            <ChatBox
+              :title="chatBox.title"
+              :visible="chatBox.visible"
+              @close="closeChatBox(index)"
+            />
+          </div>
+        </div>
       </div>
     </b-sidebar>
   </div>
