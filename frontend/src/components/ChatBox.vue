@@ -80,7 +80,9 @@ export default {
         )
         .then((response) => {
           console.log(JSON.stringify(response.data));
-          this.messages = response.data;
+          if (response.data != null) {
+            this.messages = response.data;
+          }
         });
     } catch (error) {
       console.error("Error parsing message data:", error);
