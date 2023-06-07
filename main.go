@@ -72,6 +72,9 @@ func Handler() http.Handler {
 				fmt.Println("ServeWebSocket")
 				WsHandler(w, r)
 			}
+			if strings.HasSuffix(_path, "chatDb") {
+				GetMessagesHandler(w, r)
+			}
 			return
 		}
 

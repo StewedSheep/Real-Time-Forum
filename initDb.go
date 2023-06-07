@@ -30,7 +30,6 @@ func StartDb() {
 	statement.Exec()
 	defer userDb.Close()
 
-
 	threadDb, err = sql.Open("sqlite3", "./data.db")
 	if err != nil {
 		panic(err.Error())
@@ -41,13 +40,14 @@ func StartDb() {
 	statement.Exec()
 	defer threadDb.Close()
 
-
-	chatDb, err = sql.Open("sqlite3", "./chat.db")
+	chatDb, err := sql.Open("sqlite3", "./messages.db")
 	if err != nil {
 		panic(err.Error())
 	}
-	statement, _ = chatDb.Prepare("CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY, author TEXT, recip TEXT, message TEXT, date TEXT)")
+	statement, err = chatDb.Prepare("CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY, author TEXT, recipient TEXT, content TEXT)")
+	if err != nil {
+		panic(err.Error())
+	}
 	statement.Exec()
-
 	defer chatDb.Close()
 }

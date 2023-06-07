@@ -12,7 +12,7 @@
         v-for="msg in messages"
         :key="msg.id"
         :class="{
-          'sent-message': msg.from != title,
+          'sent-message': msg.from !== title,
           'received-message': msg.from == title,
         }"
         class="message"
@@ -73,18 +73,29 @@ export default {
   },
 
   created() {
+    try {
+      axios
+        .get(
+          `http://localhost:8000/api/v1/chatDb?from=${this.$user.current}&to=${this.title}`
+        )
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          this.messages = response.data;
+        });
+    } catch (error) {
+      console.error("Error parsing message data:", error);
+    }
     this.$socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         this.messages.push(data);
-        console.log(this.messages);
       } catch (error) {
         console.error("Error parsing message data:", error);
       }
-    };
 
-    this.$socket.onerror = (error) => {
-      console.log(`WebSocket error: ${error}`);
+      this.$socket.onerror = (error) => {
+        console.log(`WebSocket error: ${error}`);
+      };
     };
   },
 
@@ -99,19 +110,6 @@ export default {
       this.$emit("close");
     },
 
-    loadMessages(chatBox) {
-      // Replace this with your actual API call to fetch messages from the server
-      // You'll need to adjust the endpoint and request parameters based on your server implementation
-      axios
-        .get(`/api/messages/${chatBox.id}`)
-        .then((response) => {
-          // Assuming the server returns an array of messages in the response
-          chatBox.messages = response.data;
-        })
-        .catch((error) => {
-          console.error("Failed to load messages:", error);
-        });
-    },
     sendMessage() {
       if (this.$socket && this.$socket.readyState === WebSocket.OPEN) {
         if (this.newMessage !== "") {
