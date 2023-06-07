@@ -17,7 +17,7 @@
         }"
         class="message"
       >
-        {{ msg.from }}: {{ msg.content }}
+        {{ msg.from }}: {{ msg.content }} {{ msg.date }}
       </div>
       <!-- </div> -->
     </div>
@@ -51,6 +51,7 @@ export default {
         to: "",
         from: "",
         content: "",
+        date: "",
       },
       newMessage: "",
       users: [],
