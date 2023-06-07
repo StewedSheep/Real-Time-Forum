@@ -15,17 +15,12 @@ type Client struct {
 	username string
 }
 
-type DbMessage struct {
-	Id      int    `json:"id"`
-	From    string `json:"from"`
-	To      string `json:"to"`
-	Content string `json:"content"`
-}
-
 type Message struct {
 	To      string `json:"to"`
 	From    string `json:"from"`
 	Content string `json:"content"`
+	Date    string `json:"date"`
+	Read    bool
 }
 
 var clients = make(map[string]*Client)
@@ -105,37 +100,12 @@ func (c *Client) write() {
 }
 
 func insertMessage(db *sql.DB, from string, to string, content string) error {
-	statement, err := db.Prepare("INSERT INTO messages (author, recipient, content) VALUES (?, ?, ?)")
+	statement, err := db.Prepare("INSERT INTO messages (author, recipient, content, date) VALUES (?, ?, ?, datetime('now'))")
 	if err != nil {
 		return err
 	}
 	_, err = statement.Exec(from, to, content)
-	log.Printf("inserted message", from, to, content)
 	return err
 }
 
 // move to chatdb.go when done debugging
-func GetMessages(db *sql.DB, from string, to string) ([]DbMessage, error) {
-	rows, err := db.Query("SELECT id, author, recipient, content FROM messages WHERE author = ? AND recipient = ? OR author = ? AND recipient = ?", from, to, to, from)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var msgs []DbMessage
-	for rows.Next() {
-		var msg DbMessage
-		err := rows.Scan(&msg.Id, &msg.From, &msg.To, &msg.Content)
-		if err != nil {
-			return nil, err
-		}
-		msgs = append(msgs, msg)
-	}
-
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-
-	return msgs, nil
-}

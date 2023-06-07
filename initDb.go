@@ -44,7 +44,7 @@ func StartDb() {
 	if err != nil {
 		panic(err.Error())
 	}
-	statement, err = chatDb.Prepare("CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY, author TEXT, recipient TEXT, content TEXT)")
+	statement, err = chatDb.Prepare("CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY, author TEXT, recipient TEXT, content TEXT, date DATETIME, read INTEGER DEFAULT 0)")
 	if err != nil {
 		panic(err.Error())
 	}
