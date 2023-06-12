@@ -78,7 +78,7 @@ func (c *Client) read() {
 		log.Printf("incoming message %+v", msg)
 
 		database, _ := sql.Open("sqlite3", "./messages.db")
-		err := insertMessage(database, msg.From, msg.To, msg.Content)
+		err := insertMessage(database, msg.From, msg.To, msg.Content, msg.Date)
 		if err != nil {
 			log.Printf("error inserting message into database: %v", err)
 		}
@@ -99,12 +99,12 @@ func (c *Client) write() {
 	}
 }
 
-func insertMessage(db *sql.DB, from string, to string, content string) error {
-	statement, err := db.Prepare("INSERT INTO messages (author, recipient, content, date) VALUES (?, ?, ?, datetime('now'))")
+func insertMessage(db *sql.DB, from string, to string, content string, date string) error {
+	statement, err := db.Prepare("INSERT INTO messages (author, recipient, content, date) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
-	_, err = statement.Exec(from, to, content)
+	_, err = statement.Exec(from, to, content, date)
 	return err
 }
 

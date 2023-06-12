@@ -1,10 +1,10 @@
 <template>
-  <div v-if="visible" class="chatbox">
+  <div v-if="visible" ref="chatbox" class="chatbox">
     <div class="header">
       <h3>{{ title }}</h3>
       <button class="logButton" @click="close()">&times;</button>
     </div>
-    <div class="content">
+    <div ref="content" class="content">
       <!-- Chat content goes here -->
       <!-- <div v-for="chatBox in chatBoxes" :key="chatBox.id"> -->
       <!-- Only display messages when the chatbox is open -->
@@ -19,7 +19,7 @@
       >
         {{ msg.from }}: {{ msg.content }} {{ msg.date }}
       </div>
-      <!-- </div> -->
+      <div ref="bottomEl"></div>
     </div>
     <div class="card-footer">
       <input
@@ -47,6 +47,7 @@ export default {
         messages: [],
         name: "",
       },
+      messageCount: 10,
       message: {
         to: "",
         from: "",
@@ -60,6 +61,7 @@ export default {
         name: "",
       },
       messages: [],
+      page: 2,
     };
   },
   props: {
@@ -73,11 +75,15 @@ export default {
     },
   },
 
+  updated() {
+    this.scrollToBottom();
+  },
+
   created() {
     try {
       axios
         .get(
-          `http://localhost:8000/api/v1/chatDb?from=${this.$user.current}&to=${this.title}`
+          `http://localhost:8000/api/v1/chatDb?from=${this.$user.current}&to=${this.title}&page=1`
         )
         .then((response) => {
           console.log(JSON.stringify(response.data));
@@ -109,6 +115,10 @@ export default {
       },
     },
 
+    scrollToBottom() {
+      this.$refs.bottomEl?.scrollIntoView({ behavior: "smooth" });
+    },
+
     close() {
       this.$emit("close");
     },
@@ -116,13 +126,20 @@ export default {
     sendMessage() {
       if (this.$socket && this.$socket.readyState === WebSocket.OPEN) {
         if (this.newMessage !== "") {
-          console.log(this.title, this.$user.current, this.newMessage);
-          this.$socket.send(JSON.stringify({ to: this.title, content: this.newMessage }));
+          this.$socket.send(
+            JSON.stringify({
+              to: this.title,
+              content: this.newMessage,
+              date: new Date().toISOString(),
+            })
+          );
           this.messages.push({
             to: this.title,
             from: this.$user.current,
             content: this.newMessage,
+            date: new Date().toISOString(),
           });
+          this.scrollToBottom();
           this.newMessage = "";
         } else {
           console.log(
@@ -146,7 +163,7 @@ export default {
 }
 
 .received-message {
-  background-color: #f5d061;
+  background-color: #f5c361;
   border-radius: 0.4rem 0.4rem 0.4rem 0;
   padding-right: 0.5rem;
   padding-left: 0.5rem;
@@ -154,7 +171,7 @@ export default {
 
   /* Add other styles for received messages */
 }
-.chatBox {
+.chatbox {
   border-radius: 5px;
 }
 .messageTextArea {
@@ -175,6 +192,8 @@ export default {
 .content {
   height: 14rem;
   background-color: #e6af2e !important;
+  height: 300px;
+  overflow-y: auto;
 }
 .header {
   background-color: #f5d061 !important;

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type DbMessage struct {
@@ -49,6 +50,7 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	io.Copy(w, bytes.NewReader(j))
 }
+
 //handles the request from frontend to get messages for chat
 func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["from"]
@@ -65,8 +67,15 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	to := keys[0]
 
+	keys, ok = r.URL.Query()["page"]
+	if !ok || len(keys[0]) < 1 {
+		log.Println("Url Param 'page' is missing")
+		return
+	}
+	page, _ := strconv.Atoi(keys[0])
+
 	database, _ := sql.Open("sqlite3", "./messages.db")
-	msgs, err := GetMessages(database, from, to)
+	msgs, err := GetMessages(database, from, to, page)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,18 +83,20 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("getting message history", msgs)
 	json.NewEncoder(w).Encode(msgs)
 }
-//
-func markMessageAsRead(db *sql.DB, from string, to string) error {
-	statement, err := db.Prepare("UPDATE messages SET read = 1 WHERE author = ?")
-	if err != nil {
-		return err
-	}
-	_, err = statement.Exec(id)
-	return err
-}
 
-func GetMessages(db *sql.DB, from string, to string) ([]DbMessage, error) {
-	rows, err := db.Query("SELECT id, author, recipient, content, date, read FROM messages WHERE author = ? AND recipient = ? OR author = ? AND recipient = ?", from, to, to, from)
+// //
+// func markMessageAsRead(db *sql.DB, from string, to string) error {
+// 	statement, err := db.Prepare("UPDATE messages SET read = 1 WHERE author = ?")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	_, err = statement.Exec(id)
+// 	return err
+// }
+
+func GetMessages(db *sql.DB, from string, to string, page int) ([]DbMessage, error) {
+	offset := (page - 1) * 10
+	rows, err := db.Query("SELECT id, author, recipient, content, date FROM messages WHERE author = ? AND recipient = ? OR author = ? AND recipient = ? ORDER BY id DESC LIMIT 10 OFFSET ?", from, to, to, from, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -94,11 +105,11 @@ func GetMessages(db *sql.DB, from string, to string) ([]DbMessage, error) {
 	var msgs []DbMessage
 	for rows.Next() {
 		var msg DbMessage
-		err := rows.Scan(&msg.Id, &msg.From, &msg.To, &msg.Content, &msg.Date, &msg.Read)
+		err := rows.Scan(&msg.Id, &msg.From, &msg.To, &msg.Content, &msg.Date)
 		if err != nil {
 			return nil, err
 		}
-		msgs = append(msgs, msg)
+		msgs = append([]DbMessage{msg}, msgs...)
 	}
 
 	err = rows.Err()
