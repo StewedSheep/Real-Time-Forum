@@ -4,7 +4,7 @@
       <h3>{{ title }}</h3>
       <button class="logButton" @click="close()">&times;</button>
     </div>
-    <div ref="content" class="content">
+    <div ref="content" class="content" @scroll="handleScroll">
       <!-- Chat content goes here -->
       <!-- <div v-for="chatBox in chatBoxes" :key="chatBox.id"> -->
       <!-- Only display messages when the chatbox is open -->
@@ -36,6 +36,7 @@
 
 <script>
 import axios from "axios";
+import { debounce } from "lodash";
 export default {
   name: "ChatBox",
   data() {
@@ -47,7 +48,6 @@ export default {
         messages: [],
         name: "",
       },
-      messageCount: 10,
       message: {
         to: "",
         from: "",
@@ -61,7 +61,7 @@ export default {
         name: "",
       },
       messages: [],
-      page: 2,
+      page: 1,
     };
   },
   props: {
@@ -75,25 +75,7 @@ export default {
     },
   },
 
-  updated() {
-    this.scrollToBottom();
-  },
-
   created() {
-    try {
-      axios
-        .get(
-          `http://localhost:8000/api/v1/chatDb?from=${this.$user.current}&to=${this.title}&page=1`
-        )
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-          if (response.data != null) {
-            this.messages = response.data;
-          }
-        });
-    } catch (error) {
-      console.error("Error parsing message data:", error);
-    }
     this.$socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -108,6 +90,17 @@ export default {
     };
   },
 
+  mounted() {
+    const debouncedHandleScroll = debounce(this.handleScroll(), 1000);
+
+    // Add the debounced scroll event listener
+    window.addEventListener("scroll", debouncedHandleScroll);
+  },
+
+  // Clean up the event listener when the component is destroyed
+  beforeDestroy() {
+    window.removeEventListener("scroll", this.debouncedHandleScroll);
+  },
   methods: {
     sockets: {
       onmessage(data) {
@@ -116,11 +109,42 @@ export default {
     },
 
     scrollToBottom() {
-      this.$refs.bottomEl?.scrollIntoView({ behavior: "smooth" });
+      this.$refs.bottomEl?.scrollIntoView({
+        behavior: "instant",
+        offset: { top: 150, left: 0 },
+      });
+    },
+
+    handleScroll() {
+      const container = this.$refs.content;
+      if (container.scrollTop === 0) {
+        this.loadMoreMessages();
+      }
     },
 
     close() {
       this.$emit("close");
+    },
+
+    loadMoreMessages() {
+      try {
+        axios
+          .get(
+            `http://localhost:8000/api/v1/chatDb?from=${this.$user.current}&to=${this.title}&page=${this.page}`
+          )
+          .then((response) => {
+            console.log(JSON.stringify(response.data));
+            if (response.data != null && this.page == 1) {
+              this.messages = response.data;
+              this.page++;
+            } else {
+              [...this.messages] = [...response.data, ...this.messages];
+              this.page++;
+            }
+          });
+      } catch (error) {
+        console.error("Error parsing message data:", error);
+      }
     },
 
     sendMessage() {
@@ -139,8 +163,8 @@ export default {
             content: this.newMessage,
             date: new Date().toISOString(),
           });
-          this.scrollToBottom();
           this.newMessage = "";
+          this.scrollToBottom();
         } else {
           console.log(
             "Unable to send message. The WebSocket connection is not open or no input."
