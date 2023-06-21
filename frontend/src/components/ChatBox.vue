@@ -75,18 +75,6 @@ export default {
     },
   },
 
-  updated() {},
-  created() {
-    // this.$socket.onmessage = (event) => {
-    //   try {
-    //     const data = JSON.parse(event.data);
-    //     this.messages.push(data);
-    //   } catch (error) {
-    //     console.error("Error parsing message data:", error);
-    //   }
-    // };
-  },
-
   mounted() {
     this.loadMoreMessages();
   },
@@ -151,8 +139,18 @@ export default {
 };
 </script>
 <style>
+.sent-author {
+  text-align: right;
+}
+
+.message-author {
+  font-size: 0.75rem;
+  margin-bottom: -0.75rem;
+}
+
 .sent-message {
-  background-color: #f5d061;
+  margin-left: auto;
+  background-color: #f5d061 !important;
   border-radius: 0.4rem 0.4rem 0rem 0.4rem;
   padding-right: 0.5rem;
   padding-left: 0.5rem;
@@ -162,7 +160,7 @@ export default {
 }
 
 .received-message {
-  background-color: #f5c361;
+  background-color: #f5d061;
   border-radius: 0.4rem 0.4rem 0.4rem 0;
   padding-right: 0.5rem;
   padding-left: 0.5rem;
