@@ -10431,6 +10431,11 @@
   "resolved" "https://registry.npmjs.org/vue-axios/-/vue-axios-3.5.2.tgz"
   "version" "3.5.2"
 
+"vue-chat-scroll@^2.0.0-alpha.4":
+  "integrity" "sha512-ChtlhST7Si4swS+J9HlOPVR0+RAUW/54JR3utu+SOy8yPknQIX2iUyNtlC8XI6AYH3RKLtF9sQz3frU6Hbmakg=="
+  "resolved" "https://registry.npmjs.org/vue-chat-scroll/-/vue-chat-scroll-2.0.0-alpha.4.tgz"
+  "version" "2.0.0-alpha.4"
+
 "vue-cookies-reactive@^2.1.1":
   "integrity" "sha512-3Nn9ExekkKCWpJsHZt5bKPqv+i/cEzK7lC9kyJbbXsnORZsTcrqJ5GTfpOk++WtkQuwZFcBi/YQxY663DR72TA=="
   "resolved" "https://registry.npmjs.org/vue-cookies-reactive/-/vue-cookies-reactive-2.1.1.tgz"
@@ -10511,7 +10516,7 @@
   "resolved" "https://registry.npmjs.org/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz"
   "version" "1.9.1"
 
-"vue@*", "vue@^2 || ^3.2.13", "vue@^2.5.18", "vue@^2.6.14", "vue@^3.0.0 || ^2.0.0", "vue@2.x":
+"vue@*", "vue@^2 || ^3.2.13", "vue@^2.0.0", "vue@^2.5.18", "vue@^2.6.14", "vue@^3.0.0 || ^2.0.0", "vue@2.x":
   "integrity" "sha512-ncwlZx5qOcn754bCu5/tS/IWPhXHopfit79cx+uIlLMyt3vCMGcXai5yCG5y+I6cDmEj4ukRYyZail9FTQh7lQ=="
   "resolved" "https://registry.npmjs.org/vue/-/vue-2.7.8.tgz"
   "version" "2.7.8"

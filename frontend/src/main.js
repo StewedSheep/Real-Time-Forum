@@ -5,6 +5,7 @@ import axios from "axios";
 import VueAxios from "vue-axios";
 import VueCookies from 'vue-cookies-reactive';
 import vSelect from "vue-select";
+import VueChatScroll from 'vue-chat-scroll';
 import BootstrapVue from "bootstrap-vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
@@ -31,6 +32,7 @@ const store = Vue.observable({
   }
 });
 
+Vue.use(VueChatScroll);
 Vue.use(BootstrapVue);
 Vue.use(GlobalStores)
 

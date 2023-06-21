@@ -4,7 +4,7 @@
       <h3>{{ title }}</h3>
       <button class="logButton" @click="close()">&times;</button>
     </div>
-    <div ref="content" class="content" @scroll="handleScroll">
+    <div v-chat-scroll ref="content" class="content" @scroll="handleScroll">
       <!-- Chat content goes here -->
       <!-- <div v-for="chatBox in chatBoxes" :key="chatBox.id"> -->
       <!-- Only display messages when the chatbox is open -->
@@ -36,7 +36,7 @@
 
 <script>
 import axios from "axios";
-import { debounce } from "lodash";
+//import { debounce } from "lodash";
 export default {
   name: "ChatBox",
   data() {
@@ -75,46 +75,22 @@ export default {
     },
   },
 
+  updated() {},
   created() {
-    this.$socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        this.messages.push(data);
-      } catch (error) {
-        console.error("Error parsing message data:", error);
-      }
-
-      this.$socket.onerror = (error) => {
-        console.log(`WebSocket error: ${error}`);
-      };
-    };
+    // this.$socket.onmessage = (event) => {
+    //   try {
+    //     const data = JSON.parse(event.data);
+    //     this.messages.push(data);
+    //   } catch (error) {
+    //     console.error("Error parsing message data:", error);
+    //   }
+    // };
   },
 
   mounted() {
-    const debouncedHandleScroll = debounce(this.handleScroll(), 1000);
-
-    // Add the debounced scroll event listener
-    window.addEventListener("scroll", debouncedHandleScroll);
-  },
-
-  // Clean up the event listener when the component is destroyed
-  beforeDestroy() {
-    window.removeEventListener("scroll", this.debouncedHandleScroll);
+    this.loadMoreMessages();
   },
   methods: {
-    sockets: {
-      onmessage(data) {
-        console.log("recived, ", data);
-      },
-    },
-
-    scrollToBottom() {
-      this.$refs.bottomEl?.scrollIntoView({
-        behavior: "instant",
-        offset: { top: 150, left: 0 },
-      });
-    },
-
     handleScroll() {
       const container = this.$refs.content;
       if (container.scrollTop === 0) {
@@ -164,7 +140,6 @@ export default {
             date: new Date().toISOString(),
           });
           this.newMessage = "";
-          this.scrollToBottom();
         } else {
           console.log(
             "Unable to send message. The WebSocket connection is not open or no input."

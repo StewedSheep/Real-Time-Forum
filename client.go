@@ -16,11 +16,11 @@ type Client struct {
 }
 
 type Message struct {
-	To      string `json:"to"`
-	From    string `json:"from"`
-	Content string `json:"content"`
-	Date    string `json:"date"`
-	Read    bool
+	Type    string      `json:type`
+	To      string      `json:"to"`
+	From    string      `json:"from"`
+	Content interface{} `json:"content"`
+	Date    string      `json:"date"`
 }
 
 var clients = make(map[string]*Client)
@@ -42,6 +42,7 @@ func Echo() {
 		case client := <-register:
 			fmt.Println("registered ws client", client.username)
 			clients[client.username] = client
+			sendActiveUsers()
 		}
 	}
 }
@@ -64,6 +65,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	go client.write()
 
 	register <- client
+	sendActiveUsers()
 }
 
 func (c *Client) read() {
@@ -78,7 +80,7 @@ func (c *Client) read() {
 		log.Printf("incoming message %+v", msg)
 
 		database, _ := sql.Open("sqlite3", "./messages.db")
-		err := insertMessage(database, msg.From, msg.To, msg.Content, msg.Date)
+		err := insertMessage(database, msg.From, msg.To, msg.Content.(string), msg.Date)
 		if err != nil {
 			log.Printf("error inserting message into database: %v", err)
 		}
@@ -91,7 +93,7 @@ func (c *Client) read() {
 func (c *Client) write() {
 	defer c.conn.Close()
 	for msg := range c.outbound {
-		log.Printf("Sending message %+v", msg)
+		log.Printf("Sending message %+v to %v", msg, c.username)
 		if err := c.conn.WriteJSON(msg); err != nil {
 			log.Println(err)
 			return
@@ -99,6 +101,7 @@ func (c *Client) write() {
 	}
 }
 
+//adds message to messages.db
 func insertMessage(db *sql.DB, from string, to string, content string, date string) error {
 	statement, err := db.Prepare("INSERT INTO messages (author, recipient, content, date) VALUES (?, ?, ?, ?)")
 	if err != nil {
@@ -108,4 +111,20 @@ func insertMessage(db *sql.DB, from string, to string, content string, date stri
 	return err
 }
 
-// move to chatdb.go when done debugging
+//broadcasts active users to all clients
+func sendActiveUsers() {
+	activeUsers := make([]string, 0, len(clients))
+	for username := range clients {
+		activeUsers = append(activeUsers, username)
+	}
+
+	for _, client := range clients {
+		client.outbound <- Message{
+			Type:    "activeUsers",
+			To:      "",
+			From:    "",
+			Content: activeUsers,
+			Date:    "",
+		}
+	}
+}

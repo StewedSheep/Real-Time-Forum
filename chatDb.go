@@ -16,7 +16,6 @@ type DbMessage struct {
 	To      string `json:"to"`
 	Content string `json:"content"`
 	Date    string `json:"date"`
-	Read    bool   `json:"read"`
 }
 
 var username string
@@ -83,16 +82,6 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("getting message history", msgs)
 	json.NewEncoder(w).Encode(msgs)
 }
-
-// //
-// func markMessageAsRead(db *sql.DB, from string, to string) error {
-// 	statement, err := db.Prepare("UPDATE messages SET read = 1 WHERE author = ?")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	_, err = statement.Exec(id)
-// 	return err
-// }
 
 func GetMessages(db *sql.DB, from string, to string, page int) ([]DbMessage, error) {
 	offset := (page - 1) * 10

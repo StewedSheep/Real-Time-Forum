@@ -30,7 +30,7 @@ export default {
   },
   methods: {
     openChatBox(user) {
-      console.log(user);
+      //console.log(user);
       this.chatBoxes.push({
         title: user,
         visible: true,
@@ -69,22 +69,15 @@ export default {
         >
           <h5 id="chatBarButton">{{ user }}</h5>
           <!-- sets online indicator -->
-          <!-- <div v-for="actUser in users" :key="actUser.name">
-            <p>
-            {{ actUser.name }}
-            </p>
-            <span
-              v-if="user == actUser.name"
-              id="chatBarButton"
-              class="statusDotOnline"
-            />
+          <div v-for="actUser in users" :key="actUser">
+            <span v-if="user == actUser" id="chatBarButton" class="statusDotOnline" />
             <span v-else id="chatBarButton" class="statusDotOffline" />
-          </div> -->
+          </div>
           <br />
 
           <!-- last message data -->
-          <p id="chatBarButton">Last msg.</p>
-          <p id="chatBarButton" style="float: right">19.03 11:11</p>
+          <!-- <p id="chatBarButton">Last msg.</p> -->
+          <!-- <p id="chatBarButton" style="float: right">19.03 11:11</p> -->
         </div>
         <!-- message box containers -->
         <div class="chat-box-container">
