@@ -4,7 +4,7 @@
     <div class="notification" v-if="notification.visible">
       {{ notification.message }}
     </div>
-    <component v-bind:is="comp" :users="users" />
+    <component :key="componentKey" v-bind:is="this.comp" :users="users" />
     <router-view />
   </div>
 </template>
@@ -19,15 +19,12 @@ import LoggedIn from "./components/LoggedIn.vue";
 import LoggedOut from "./components/LoggedOut.vue";
 import PageHeader from "./components/PageHeader.vue";
 
-let loggedUsername;
-
 export default {
   data() {
     return {
-      loggedUsername,
       componentKey: 0,
       comp: LoggedOut,
-      socket: null,
+      $socket: undefined,
       serverUrl: "ws://localhost:8000/api/v1/ws",
       newMessage: "",
       //websocket data here on out
@@ -40,6 +37,7 @@ export default {
         name: "",
       },
       users: [],
+      msgList: [],
       notification: {
         message: "",
         visible: false,
@@ -47,23 +45,29 @@ export default {
     };
   },
 
-  //checks for cookie and existing websocket, updates every 100ms
+  //checks for cookie and existing websocket, updates every 200ms
   created() {
     let timer = setInterval(() => {
-      this.loggedUsername = document.cookie.split("::")[1];
-      //sets username to global storage
-      this.$user.authorised({
-        username: this.loggedUsername,
-      });
+      if (this.isLoginCookieExists()) {
+        this.$user.authorised({
+          username: this.getLoginCookieValue(),
+        });
+        this.comp = LoggedIn;
+      } else {
+        this.$user.authorised({
+          username: undefined,
+        });
+        this.comp = LoggedOut;
+      }
       //checks if ws connection should be open or closed
       if (
-        (this.$socket == null && this.$user.isAuthorised) ||
+        (this.$socket == undefined && this.$user.isAuthorised) ||
         (!this.$socket.readyState === WebSocket.OPEN && this.$user.isAuthorised)
       ) {
         this.connectToWebsocket();
         this.addMessegeListener();
       } else if (this.$socket.readyState === WebSocket.OPEN && !this.$user.isAuthorised) {
-        this.$socket.close();
+        this.closeWebSocket();
         this.$socket = undefined;
       }
     }, 200);
@@ -74,8 +78,8 @@ export default {
   },
 
   beforeDestroy() {
-    if (this.socket) {
-      this.socket.close();
+    if (this.$socket) {
+      this.$socket.close();
     }
   },
 
@@ -100,19 +104,27 @@ export default {
     connectToWebsocket() {
       Vue.use(VueNativeSock, this.serverUrl + `?username=${this.$user.current}`, {
         format: "json",
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 3000,
+        // reconnection: true,
+        // reconnectionAttempts: 5,
+        // reconnectionDelay: 3000,
       });
     },
+    closeWebSocket() {
+      this.$socket.close();
+    },
+
     addMessegeListener() {
-      this.$socket.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        if (message.Type === "activeUsers") {
-          this.users = message.content;
-          console.log(this.users);
-        }
-      };
+      if (this.$socket) {
+        this.$socket.onmessage = (event) => {
+          const message = JSON.parse(event.data);
+          if (message.Type === "activeUsers") {
+            this.users = message.content;
+          }
+          if (message.Type !== "listMsgs") {
+            this.msgList = message.content;
+          }
+        };
+      }
     },
     showNotification(message) {
       this.notification.message = message;
@@ -123,29 +135,24 @@ export default {
         this.notification.visible = false;
       }, 4000);
     },
+
+    isLoginCookieExists() {
+      return this.getLoginCookieValue() != undefined;
+    },
+    getLoginCookieValue() {
+      const cookie = document.cookie;
+      console.log(cookie.split("::")[1]);
+      return cookie.split("::")[1];
+    },
   },
   setup() {
     const state = reactive({
       users: [],
+      msgList: [],
     });
     return { state };
   },
 
-  //watches for changes in logged-in username
-  watch: {
-    loggedUsername(newVal, oldVal) {
-      if (newVal != "") {
-        this.comp = LoggedIn;
-      }
-      if (newVal == null) {
-        this.comp = LoggedOut;
-      }
-      if (oldVal != newVal) {
-        this.componentKey++;
-      }
-    },
-    immediate: true,
-  },
   name: "app",
   components: {
     PageHeader: PageHeader,

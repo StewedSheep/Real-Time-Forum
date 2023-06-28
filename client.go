@@ -23,8 +23,15 @@ type Message struct {
 	Date    string      `json:"date"`
 }
 
+type User struct {
+	ID                int
+	Username          string
+	LatestMessageDate string
+}
+
 var clients = make(map[string]*Client)
 var register = make(chan *Client)
+var unregister = make(chan *websocket.Conn)
 var messages = make(chan Message)
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -65,7 +72,25 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	go client.write()
 
 	register <- client
+
 	sendActiveUsers()
+
+	// Listen for close events from the client
+	go func() {
+		for {
+			_, _, err := conn.ReadMessage()
+			if err != nil {
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+					log.Printf("Websocket error: %v", err)
+				}
+				break
+			}
+		}
+		// Unregister the client connection
+		fmt.Println("deleted ws conn: ", client.username)
+		delete(clients, client.username)
+		sendActiveUsers()
+	}()
 }
 
 func (c *Client) read() {
@@ -86,6 +111,7 @@ func (c *Client) read() {
 		}
 
 		messages <- msg
+		sendUserMessages(c)
 	}
 }
 
@@ -100,6 +126,18 @@ func (c *Client) write() {
 		}
 	}
 }
+
+//checks for closed connections via ws
+// func isConnectionClosed(conn *websocket.Conn) bool {
+// 	_, _, err := conn.ReadMessage()
+// 	if err != nil {
+// 		if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+// 			log.Printf("Websocket error: %v", err)
+// 		}
+// 		return true
+// 	}
+// 	return false
+// }
 
 //adds message to messages.db
 func insertMessage(db *sql.DB, from string, to string, content string, date string) error {
@@ -126,5 +164,68 @@ func sendActiveUsers() {
 			Content: activeUsers,
 			Date:    "",
 		}
+	}
+}
+
+//broadcasts latest messages from users to sort them in chatbar
+func sendUserMessages(c *Client) {
+	// Connect to user.db
+	userDB, err := sql.Open("sqlite3", "./user.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer userDB.Close()
+
+	// Query all users from user.db
+	userRows, err := userDB.Query("SELECT userID, username FROM bcrypt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer userRows.Close()
+
+	// Prepare a map to store the latest message date for each user
+	userLatestMessageDates := make(map[int]string)
+
+	// Loop through each user
+	for userRows.Next() {
+		var user User
+		err := userRows.Scan(&user.ID, &user.Username)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Connect to messages.db
+		messagesDB, err := sql.Open("sqlite3", "./messages.db")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer messagesDB.Close()
+
+		// Query the latest message date for the current user from messages.db
+		var latestMessageDate sql.NullString
+		err = messagesDB.QueryRow("SELECT MAX(date) FROM messages WHERE author = ? OR recipient = ?", user.ID, user.ID).Scan(&latestMessageDate)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// Handle case where user has no messages
+				latestMessageDate.String = "No messages"
+			} else {
+				log.Fatal(err)
+			}
+		}
+
+		// Check if the latest message date is empty or null, provide a default value if so
+		if !latestMessageDate.Valid || latestMessageDate.String == "" {
+			latestMessageDate.String = "No date available"
+		}
+
+		// Store the latest message date in the map
+		userLatestMessageDates[user.ID] = latestMessageDate.String
+	}
+	c.outbound <- Message{
+		Type:    "listMsgs",
+		To:      "",
+		From:    "",
+		Content: userLatestMessageDates,
+		Date:    "",
 	}
 }

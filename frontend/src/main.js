@@ -16,7 +16,6 @@ import LoginView from './views/LoginView.vue'
 import RegisterView from './views/RegisterView.vue'
 import NewThreadView from './views/NewThreadView.vue'
 import ThreadView from './views/ThreadView.vue'
-import ChatView from './views/ChatView.vue'
 import GlobalStores from './plugins/GlobalStores';
 
 
@@ -73,11 +72,6 @@ const router = new VueRouter({
         path: '/newThread',
         name: 'newThread',
         component: NewThreadView
-      },
-      {
-        path: '/chat',
-        name: 'chat',
-        component: ChatView
       },
       {
         path: '*',

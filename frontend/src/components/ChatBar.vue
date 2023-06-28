@@ -7,6 +7,10 @@ import ChatBox from "./ChatBox.vue";
 export default {
   name: "ChatBar.vue",
   props: {
+    msgList: {
+      type: Array,
+      required: true,
+    },
     users: {
       type: Array,
       required: true,
@@ -61,6 +65,9 @@ export default {
       <br />
       <div class="px-3 py-2">
         <!-- sorts user order -->
+        <div v-for="sortlist in msgList" :key="sortlist.content">
+          <p>{{ sortlist.content }}</p>
+        </div>
         <div
           id="chatButton"
           v-for="user in sortUsers()"
@@ -74,10 +81,7 @@ export default {
             <span v-else id="chatBarButton" class="statusDotOffline" />
           </div>
           <br />
-
           <!-- last message data -->
-          <!-- <p id="chatBarButton">Last msg.</p> -->
-          <!-- <p id="chatBarButton" style="float: right">19.03 11:11</p> -->
         </div>
         <!-- message box containers -->
         <div class="chat-box-container">

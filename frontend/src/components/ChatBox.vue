@@ -5,8 +5,6 @@
       <button class="logButton" @click="close()">&times;</button>
     </div>
     <div v-chat-scroll ref="content" class="content" @scroll="handleScroll">
-      <!-- Chat content goes here -->
-      <!-- <div v-for="chatBox in chatBoxes" :key="chatBox.id"> -->
       <!-- Only display messages when the chatbox is open -->
       <div
         v-for="msg in messages"
