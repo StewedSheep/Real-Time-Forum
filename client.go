@@ -56,7 +56,7 @@ func Echo() {
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Println("registering error", err)
 		return
 	}
 
@@ -72,23 +72,8 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	register <- client
 
-	// sendUserMessages(client)
+	sendUserMessages(client)
 
-	// Listen for close events from the client
-	go func() {
-		for {
-			_, _, err := conn.ReadMessage()
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					log.Printf("Websocket error: %v", err)
-				}
-				break
-			}
-		}
-		// Unregister the client connection
-		fmt.Println("deleted ws conn: ", client.username)
-		delete(clients, client.username)
-	}()
 }
 
 func (c *Client) read() {
@@ -96,22 +81,24 @@ func (c *Client) read() {
 	for {
 		msg := Message{}
 		if err := c.conn.ReadJSON(&msg); err != nil {
-			log.Println(err)
+			log.Println("ws read err: ", err)
 			return
 		}
 		msg.From = c.username
+		msg.Type = "chat"
 		log.Printf("incoming message %+v", msg)
 
-		if msg.Type != "activeUsers" && msg.Type != "listMsgs" {
-			database, _ := sql.Open("sqlite3", "./messages.db")
-			err := insertMessage(database, msg.From, msg.To, msg.Content.(string), msg.Date)
-			log.Printf("message entered into db")
-			if err != nil {
-				log.Printf("error inserting message into database: %v", err)
-			}
-			// sendUserMessages(c)
-			// sendUserMessages(clients[msg.To])
+		// if msg.Type != "activeUsers" && msg.Type != "listMsgs" {
+		database, _ := sql.Open("sqlite3", "./messages.db")
+		err := insertMessage(database, msg.From, msg.To, msg.Content.(string), msg.Date)
+		log.Printf("message entered into db")
+		if err != nil {
+			log.Printf("error inserting message into database: %v", err)
 		}
+		//updates recip and author message lists
+		sendUserMessages(c)
+		sendUserMessages(clients[msg.To])
+		// }
 
 		messages <- msg
 	}
@@ -121,14 +108,11 @@ func (c *Client) read() {
 func (c *Client) write() {
 	defer c.conn.Close()
 	for msg := range c.outbound {
-		//log.Printf("Sending message %+v to %v", msg, c.username)
+		log.Printf("Sending message %+v to %v", msg, c.username)
 		if err := c.conn.WriteJSON(msg); err != nil {
-			log.Println(err)
+			log.Println("ws write err: ", err)
 			return
 		}
-		// if msg.Type != "activeUsers" && msg.Type != "listMsgs" {
-		// 	sendUserMessages(c)
-		// }
 	}
 }
 
@@ -144,20 +128,20 @@ func insertMessage(db *sql.DB, from string, to string, content string, date stri
 
 //broadcasts active users to all clients
 func sendActiveUsers() {
-	// activeUsers := make([]string, 0, len(clients))
-	// for username := range clients {
-	// 	activeUsers = append(activeUsers, username)
-	// }
+	activeUsers := make([]string, 0, len(clients))
+	for username := range clients {
+		activeUsers = append(activeUsers, username)
+	}
 
-	// for _, client := range clients {
-	// 	client.outbound <- Message{
-	// 		Type:    "activeUsers",
-	// 		To:      "",
-	// 		From:    "",
-	// 		Content: activeUsers,
-	// 		Date:    "",
-	// 	}
-	// }
+	for _, client := range clients {
+		client.outbound <- Message{
+			Type:    "activeUsers",
+			To:      "",
+			From:    "",
+			Content: activeUsers,
+			Date:    "",
+		}
+	}
 }
 
 //broadcasts latest messages from users to sort them in chatbar

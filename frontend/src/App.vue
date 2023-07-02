@@ -1,7 +1,11 @@
 <template>
   <div>
     <PageHeader />
-    <div class="notification" v-if="notification.visible">
+    <div
+      v-for="notification in notifications"
+      :key="notification.id"
+      class="notification"
+    >
       {{ notification.message }}
     </div>
     <component :key="componentKey" v-bind:is="this.comp" :users="users" :list="list" />
@@ -27,12 +31,15 @@ export default {
       $socket: undefined,
       serverUrl: "ws://localhost:8000/api/v1/ws",
       newMessage: "",
+      notifications: [],
+      notificationId: 1,
       //websocket data here on out
       recipient: "",
       message: "",
       messages: [],
       chatBoxes: [],
       roomInput: null,
+      chatopen: false,
       user: {
         name: "",
       },
@@ -94,11 +101,11 @@ export default {
     });
   },
 
-  sockets: {
-    onmessage(data) {
-      console.log("recived, ", data);
-    },
-  },
+  // sockets: {
+  //   onmessage(data) {
+  //     console.log("recived, ", data);
+  //   },
+  // },
 
   methods: {
     connectToWebsocket() {
@@ -108,13 +115,14 @@ export default {
         // reconnectionAttempts: 5,
         // reconnectionDelay: 3000,
       });
+      console.log("connected to ws!");
     },
     closeWebSocket() {
       this.$socket.close();
     },
 
     addMessegeListener() {
-      if (this.$socket) {
+      if (this.$socket !== undefined) {
         this.$socket.onmessage = (event) => {
           const message = JSON.parse(event.data);
           console.log("from app.vue", message);
@@ -123,26 +131,40 @@ export default {
           } else if (message.Type === "listMsgs" && message.to == this.$user.current) {
             this.list = message.content;
             console.log(this.list);
-            // } else if (message.Type !== "activeUsers" && message.Type !== "listMsgs") {
-            // for (const key in this.chatBoxes) {
-            //   const chatBox = this.chatBoxes[key];
-            //   console.log(chatBox.title);
-            //   if (message.from == chatBox.title) {
-            //     this.chatBoxes[message.from].messages.push(message);
-            //   }
-            // }
+          } else if (message.Type == "chat") {
+            this.chatopen = false;
+            for (const key in this.chatBoxes) {
+              const chatBox = this.chatBoxes[key];
+              console.log(chatBox.title);
+              if (message.from == chatBox.title && chatBox.visible == true) {
+                EventBus.$emit("chatbox-data", message);
+                this.chatopen = true;
+              }
+            }
+            if (this.chatopen == false) {
+              this.showNotification(message.from);
+              console.log("notification fired");
+            }
           }
         };
       }
     },
     showNotification(message) {
-      this.notification.message = message;
-      this.notification.visible = true;
+      const notification = {
+        id: this.notificationId++,
+        message: "New message from: " + message,
+      };
 
-      // Hide the notification after a certain duration (4 seconds)
+      this.notifications.push(notification);
+
       setTimeout(() => {
-        this.notification.visible = false;
-      }, 4000);
+        this.removeNotification(notification.id);
+      }, 5000);
+    },
+    removeNotification(id) {
+      this.notifications = this.notifications.filter(
+        (notification) => notification.id !== id
+      );
     },
     //checks cookie from browser storage
     isLoginCookieExists() {
@@ -178,12 +200,24 @@ export default {
 .notification {
   position: fixed;
   top: 20px;
-  right: 20px;
+  left: 20px;
   padding: 10px;
-  background-color: #f5f5f5;
-  border: 1px solid #ccc;
+  background-color: #282f44;
+  border: 1px solid #e6af2e;
   border-radius: 4px;
   animation: fade-in 0.3s ease-in-out;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  margin-bottom: 10px;
+}
+
+.notification:first-child {
+  margin-top: 0;
+}
+
+.notification + .notification {
+  margin-top: 50px;
 }
 
 @keyframes fade-in {

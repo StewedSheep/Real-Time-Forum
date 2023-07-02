@@ -21,7 +21,6 @@
 
 <script>
 import Vue from "vue";
-import VueNativeSock from "vue-native-websocket";
 import { toRef } from "vue";
 import ChatBar from "./ChatBar.vue";
 
@@ -51,11 +50,6 @@ export default {
           "Content-Type": "text/plain",
           "Access-Control-Allow-Origin": "*",
         },
-      });
-      const websocketInstances = Object.values(VueNativeSock.instances);
-      // Close each WebSocket connection
-      websocketInstances.forEach((instance) => {
-        instance.$socket.close();
       });
     },
   },

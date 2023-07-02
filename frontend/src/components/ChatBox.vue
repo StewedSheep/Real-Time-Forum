@@ -34,6 +34,7 @@
 
 <script>
 import axios from "axios";
+import EventBus from "@/stores/event-bus.js";
 //import { debounce } from "lodash";
 export default {
   name: "ChatBox",
@@ -47,6 +48,7 @@ export default {
         name: "",
       },
       message: {
+        Type: "",
         to: "",
         from: "",
         content: "",
@@ -73,21 +75,13 @@ export default {
     },
   },
 
-  created() {
-    this.$socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log("from chatbox.vue", data);
-        if (data.Type !== "activeUsers" && data.Type !== "listMsgs") {
-          this.messages.push(data);
-        }
-      } catch (error) {
-        console.error("Error parsing message data:", error);
-      }
-    };
-  },
   mounted() {
     this.loadMoreMessages();
+    EventBus.$on("chatbox-data", (eventData) => {
+      if (eventData.from == this.title && this.visible == true) {
+        this.messages.push(eventData);
+      }
+    });
   },
   methods: {
     handleScroll() {
@@ -122,21 +116,20 @@ export default {
     },
 
     sendMessage() {
-      if (this.$socket && this.$socket.readyState === WebSocket.OPEN) {
+      if (this.$socket != undefined && this.$socket.readyState === WebSocket.OPEN) {
         if (this.newMessage !== "") {
-          this.$socket.send(
-            JSON.stringify({
-              to: this.title,
-              content: this.newMessage,
-              date: new Date().toISOString(),
-            }),
-            console.log(
-              "sent data",
-              this.title,
-              this.newMessage,
-              new Date().toISOString()
-            )
-          );
+          try {
+            this.$socket.send(
+              JSON.stringify({
+                to: this.title,
+                content: this.newMessage,
+                date: new Date().toISOString(),
+              })
+            );
+          } catch (error) {
+            // Handle send error
+            console.error("Error sending message:", error);
+          }
           this.messages.push({
             to: this.title,
             from: this.$user.current,
