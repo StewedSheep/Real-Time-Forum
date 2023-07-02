@@ -7,7 +7,7 @@
       type="dark"
       variant="info"
     >
-      <ChatBar :users="users" />
+      <ChatBar :users="users" :list="list" />
       <b-navbar-nav class="ml-auto">
         <em class="loggedInAs">Logged in as: {{ $user.current }} </em>
         <router-link class="logButton" to="newThread">Create a New Thread</router-link>
@@ -21,6 +21,7 @@
 
 <script>
 import Vue from "vue";
+import VueNativeSock from "vue-native-websocket";
 import { toRef } from "vue";
 import ChatBar from "./ChatBar.vue";
 
@@ -29,6 +30,9 @@ export default {
     users: {
       type: Array,
       required: true,
+    },
+    list: {
+      type: Object,
     },
   },
   data() {
@@ -47,6 +51,11 @@ export default {
           "Content-Type": "text/plain",
           "Access-Control-Allow-Origin": "*",
         },
+      });
+      const websocketInstances = Object.values(VueNativeSock.instances);
+      // Close each WebSocket connection
+      websocketInstances.forEach((instance) => {
+        instance.$socket.close();
       });
     },
   },

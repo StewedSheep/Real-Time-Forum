@@ -73,6 +73,19 @@ export default {
     },
   },
 
+  created() {
+    this.$socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log("from chatbox.vue", data);
+        if (data.Type !== "activeUsers" && data.Type !== "listMsgs") {
+          this.messages.push(data);
+        }
+      } catch (error) {
+        console.error("Error parsing message data:", error);
+      }
+    };
+  },
   mounted() {
     this.loadMoreMessages();
   },
@@ -95,7 +108,6 @@ export default {
             `http://localhost:8000/api/v1/chatDb?from=${this.$user.current}&to=${this.title}&page=${this.page}`
           )
           .then((response) => {
-            console.log(JSON.stringify(response.data));
             if (response.data != null && this.page == 1) {
               this.messages = response.data;
               this.page++;
@@ -117,7 +129,13 @@ export default {
               to: this.title,
               content: this.newMessage,
               date: new Date().toISOString(),
-            })
+            }),
+            console.log(
+              "sent data",
+              this.title,
+              this.newMessage,
+              new Date().toISOString()
+            )
           );
           this.messages.push({
             to: this.title,

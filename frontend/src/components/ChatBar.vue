@@ -15,6 +15,10 @@ export default {
       type: Array,
       required: true,
     },
+    list: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
@@ -31,23 +35,53 @@ export default {
   },
   mounted() {
     Vue.axios.get("/totUsers").then((response) => (this.allUsers = response.data));
+    this.sortUsers();
   },
   methods: {
     openChatBox(user) {
-      //console.log(user);
       this.chatBoxes.push({
         title: user,
         visible: true,
       });
-      EventBus.$emit("chatbox-opened", user);
+      EventBus.$emit("chatbox-opened", this.chatBoxes);
     },
     closeChatBox(index) {
       this.chatBoxes.splice(index, 1);
+      EventBus.$emit("chatbox-closed", this.chatBoxes);
     },
 
     // based on last message and then in alphabetical order
     sortUsers() {
-      return this.allUsers.filter((user) => user !== this.$user.current);
+      const customSort = (a, b) => {
+        const dateA = this.list[a];
+        const dateB = this.list[b];
+        if (
+          (dateA === "no date" || dateA === "no msgs") &&
+          (dateB === "no date" || dateB === "no msgs")
+        ) {
+          return a.localeCompare(b);
+        } else if (dateA === "no date" || dateA === "no msgs") {
+          return 1;
+        } else if (dateB === "no date" || dateB === "no msgs") {
+          return -1;
+        }
+        return dateB.localeCompare(dateA);
+      };
+      this.allUsers = this.allUsers.sort(customSort);
+
+      // Remove the users name from the array
+      const index = this.allUsers.findIndex((name) => name === this.$user.current);
+      if (index !== -1) {
+        this.allUsers.splice(index, 1);
+      }
+    },
+  },
+  watch: {
+    list: {
+      deep: true,
+      handler() {
+        this.sortUsers();
+      },
     },
   },
   components: {
@@ -64,13 +98,9 @@ export default {
     <b-sidebar class="chatBar" id="sidebar-right" title="Let's chat!" right shadow>
       <br />
       <div class="px-3 py-2">
-        <!-- sorts user order -->
-        <div v-for="sortlist in msgList" :key="sortlist.content">
-          <p>{{ sortlist.content }}</p>
-        </div>
         <div
           id="chatButton"
-          v-for="user in sortUsers()"
+          v-for="user in this.allUsers"
           :key="user"
           @click="openChatBox(user)"
         >
@@ -82,7 +112,9 @@ export default {
           </div>
           <br />
           <!-- last message data -->
+          <p id="chatBarButton">Last msg: 1</p>
         </div>
+
         <!-- message box containers -->
         <div class="chat-box-container">
           <div

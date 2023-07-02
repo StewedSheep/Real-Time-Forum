@@ -31,7 +31,6 @@ type User struct {
 
 var clients = make(map[string]*Client)
 var register = make(chan *Client)
-var unregister = make(chan *websocket.Conn)
 var messages = make(chan Message)
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -73,7 +72,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	register <- client
 
-	sendActiveUsers()
+	// sendUserMessages(client)
 
 	// Listen for close events from the client
 	go func() {
@@ -89,7 +88,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		// Unregister the client connection
 		fmt.Println("deleted ws conn: ", client.username)
 		delete(clients, client.username)
-		sendActiveUsers()
 	}()
 }
 
@@ -104,14 +102,18 @@ func (c *Client) read() {
 		msg.From = c.username
 		log.Printf("incoming message %+v", msg)
 
-		database, _ := sql.Open("sqlite3", "./messages.db")
-		err := insertMessage(database, msg.From, msg.To, msg.Content.(string), msg.Date)
-		if err != nil {
-			log.Printf("error inserting message into database: %v", err)
+		if msg.Type != "activeUsers" && msg.Type != "listMsgs" {
+			database, _ := sql.Open("sqlite3", "./messages.db")
+			err := insertMessage(database, msg.From, msg.To, msg.Content.(string), msg.Date)
+			log.Printf("message entered into db")
+			if err != nil {
+				log.Printf("error inserting message into database: %v", err)
+			}
+			// sendUserMessages(c)
+			// sendUserMessages(clients[msg.To])
 		}
 
 		messages <- msg
-		sendUserMessages(c)
 	}
 }
 
@@ -119,25 +121,16 @@ func (c *Client) read() {
 func (c *Client) write() {
 	defer c.conn.Close()
 	for msg := range c.outbound {
-		log.Printf("Sending message %+v to %v", msg, c.username)
+		//log.Printf("Sending message %+v to %v", msg, c.username)
 		if err := c.conn.WriteJSON(msg); err != nil {
 			log.Println(err)
 			return
 		}
+		// if msg.Type != "activeUsers" && msg.Type != "listMsgs" {
+		// 	sendUserMessages(c)
+		// }
 	}
 }
-
-//checks for closed connections via ws
-// func isConnectionClosed(conn *websocket.Conn) bool {
-// 	_, _, err := conn.ReadMessage()
-// 	if err != nil {
-// 		if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-// 			log.Printf("Websocket error: %v", err)
-// 		}
-// 		return true
-// 	}
-// 	return false
-// }
 
 //adds message to messages.db
 func insertMessage(db *sql.DB, from string, to string, content string, date string) error {
@@ -151,81 +144,84 @@ func insertMessage(db *sql.DB, from string, to string, content string, date stri
 
 //broadcasts active users to all clients
 func sendActiveUsers() {
-	activeUsers := make([]string, 0, len(clients))
-	for username := range clients {
-		activeUsers = append(activeUsers, username)
-	}
+	// activeUsers := make([]string, 0, len(clients))
+	// for username := range clients {
+	// 	activeUsers = append(activeUsers, username)
+	// }
 
-	for _, client := range clients {
-		client.outbound <- Message{
-			Type:    "activeUsers",
-			To:      "",
-			From:    "",
-			Content: activeUsers,
-			Date:    "",
-		}
-	}
+	// for _, client := range clients {
+	// 	client.outbound <- Message{
+	// 		Type:    "activeUsers",
+	// 		To:      "",
+	// 		From:    "",
+	// 		Content: activeUsers,
+	// 		Date:    "",
+	// 	}
+	// }
 }
 
 //broadcasts latest messages from users to sort them in chatbar
 func sendUserMessages(c *Client) {
+	log.Printf("sendUserMessages")
 	// Connect to user.db
 	userDB, err := sql.Open("sqlite3", "./user.db")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer userDB.Close()
 
 	// Query all users from user.db
-	userRows, err := userDB.Query("SELECT userID, username FROM bcrypt")
+	userRows, err := userDB.Query("SELECT username FROM bcrypt")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer userRows.Close()
 
 	// Prepare a map to store the latest message date for each user
-	userLatestMessageDates := make(map[int]string)
+	userLatestMessageDates := make(map[string]string)
 
 	// Loop through each user
 	for userRows.Next() {
 		var user User
-		err := userRows.Scan(&user.ID, &user.Username)
+		err := userRows.Scan(&user.Username)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 
 		// Connect to messages.db
 		messagesDB, err := sql.Open("sqlite3", "./messages.db")
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		defer messagesDB.Close()
 
 		// Query the latest message date for the current user from messages.db
 		var latestMessageDate sql.NullString
-		err = messagesDB.QueryRow("SELECT MAX(date) FROM messages WHERE author = ? OR recipient = ?", user.ID, user.ID).Scan(&latestMessageDate)
+		err = messagesDB.QueryRow("SELECT MAX(date) FROM messages WHERE (author = ? AND recipient = ?) OR (author = ? AND recipient = ?)", c.username, user.Username, user.Username, c.username).Scan(&latestMessageDate)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				// Handle case where user has no messages
-				latestMessageDate.String = "No messages"
+				latestMessageDate.String = "no msgs"
 			} else {
-				log.Fatal(err)
+				log.Println(err)
 			}
 		}
 
 		// Check if the latest message date is empty or null, provide a default value if so
 		if !latestMessageDate.Valid || latestMessageDate.String == "" {
-			latestMessageDate.String = "No date available"
+			latestMessageDate.String = "no date"
 		}
 
 		// Store the latest message date in the map
-		userLatestMessageDates[user.ID] = latestMessageDate.String
+		userLatestMessageDates[user.Username] = latestMessageDate.String
 	}
-	c.outbound <- Message{
+	//sends update to author
+	messages <- Message{
 		Type:    "listMsgs",
-		To:      "",
+		To:      c.username,
 		From:    "",
 		Content: userLatestMessageDates,
 		Date:    "",
 	}
+
 }

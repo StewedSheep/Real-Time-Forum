@@ -4,7 +4,7 @@
     <div class="notification" v-if="notification.visible">
       {{ notification.message }}
     </div>
-    <component :key="componentKey" v-bind:is="this.comp" :users="users" />
+    <component :key="componentKey" v-bind:is="this.comp" :users="users" :list="list" />
     <router-view />
   </div>
 </template>
@@ -12,7 +12,7 @@
 <script>
 import Vue from "vue";
 import VueNativeSock from "vue-native-websocket";
-//import EventBus from "@/stores/event-bus.js";
+import EventBus from "@/stores/event-bus.js";
 import { reactive } from "vue";
 import ChatBox from "./components/ChatBox.vue";
 import LoggedIn from "./components/LoggedIn.vue";
@@ -37,6 +37,7 @@ export default {
         name: "",
       },
       users: [],
+      list: {},
       msgList: [],
       notification: {
         message: "",
@@ -84,14 +85,13 @@ export default {
   },
 
   mounted() {
-    // EventBus.$on("chatbox-opened", (eventData) => {
-    //   for (let i = 0; i < this.users.length; i++) {
-    //     if (this.users[i].name == eventData) {
-    //       console.log("attempting to open chat with ", this.users[i].name);
-    //       this.joinRoom(this.users[i]);
-    //     }
-    //   }
-    // });
+    EventBus.$on("chatbox-opened", (eventData) => {
+      console.log("opened chat, total chats: ", eventData);
+      this.chatBoxes = eventData;
+    });
+    EventBus.$on("chatbox-closed", (eventData) => {
+      console.log("closed chat, remaining chats: ", eventData);
+    });
   },
 
   sockets: {
@@ -117,11 +117,20 @@ export default {
       if (this.$socket) {
         this.$socket.onmessage = (event) => {
           const message = JSON.parse(event.data);
+          console.log("from app.vue", message);
           if (message.Type === "activeUsers") {
             this.users = message.content;
-          }
-          if (message.Type !== "listMsgs") {
-            this.msgList = message.content;
+          } else if (message.Type === "listMsgs" && message.to == this.$user.current) {
+            this.list = message.content;
+            console.log(this.list);
+            // } else if (message.Type !== "activeUsers" && message.Type !== "listMsgs") {
+            // for (const key in this.chatBoxes) {
+            //   const chatBox = this.chatBoxes[key];
+            //   console.log(chatBox.title);
+            //   if (message.from == chatBox.title) {
+            //     this.chatBoxes[message.from].messages.push(message);
+            //   }
+            // }
           }
         };
       }
@@ -135,19 +144,20 @@ export default {
         this.notification.visible = false;
       }, 4000);
     },
-
+    //checks cookie from browser storage
     isLoginCookieExists() {
       return this.getLoginCookieValue() != undefined;
     },
+    //gets cookie name from clients browser
     getLoginCookieValue() {
       const cookie = document.cookie;
-      console.log(cookie.split("::")[1]);
       return cookie.split("::")[1];
     },
   },
   setup() {
     const state = reactive({
       users: [],
+      list: {},
       msgList: [],
     });
     return { state };
