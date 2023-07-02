@@ -70,15 +70,13 @@ export default {
       //checks if ws connection should be open or closed
       if (
         (this.$socket == undefined && this.$user.isAuthorised) ||
-        (!this.$socket.readyState === WebSocket.OPEN && this.$user.isAuthorised)
+        (this.$socket.readyState === WebSocket.CLOSED && this.$user.isAuthorised)
       ) {
         this.connectToWebsocket();
-        this.addMessegeListener();
       } else if (this.$socket.readyState === WebSocket.OPEN && !this.$user.isAuthorised) {
         this.closeWebSocket();
-        this.$socket = undefined;
       }
-    }, 200);
+    }, 333);
     //destroys last check hook so new can be run
     this.$once("hook:beforeDestroy", () => {
       clearInterval(timer);
@@ -87,7 +85,7 @@ export default {
 
   beforeDestroy() {
     if (this.$socket) {
-      this.$socket.close();
+      this.closeWebSocket();
     }
   },
 
@@ -101,36 +99,38 @@ export default {
     });
   },
 
-  // sockets: {
-  //   onmessage(data) {
-  //     console.log("recived, ", data);
-  //   },
-  // },
-
   methods: {
     connectToWebsocket() {
+      if (this.$socket) {
+        this.$socket.close();
+        this.$socket = undefined;
+      }
       Vue.use(VueNativeSock, this.serverUrl + `?username=${this.$user.current}`, {
         format: "json",
-        // reconnection: true,
-        // reconnectionAttempts: 5,
-        // reconnectionDelay: 3000,
       });
-      console.log("connected to ws!");
+      this.addMessegeListener();
     },
     closeWebSocket() {
-      this.$socket.close();
+      if (this.$socket) {
+        this.$socket.close();
+        this.$socket = undefined;
+      }
     },
 
+    //websocket message listener
     addMessegeListener() {
       if (this.$socket !== undefined) {
         this.$socket.onmessage = (event) => {
           const message = JSON.parse(event.data);
           console.log("from app.vue", message);
+          //lists active users connected to ws
           if (message.Type === "activeUsers") {
             this.users = message.content;
+            //sends latest messages
           } else if (message.Type === "listMsgs" && message.to == this.$user.current) {
             this.list = message.content;
             console.log(this.list);
+            //listens for new chats
           } else if (message.Type == "chat") {
             this.chatopen = false;
             for (const key in this.chatBoxes) {
@@ -149,6 +149,7 @@ export default {
         };
       }
     },
+    //notification for unopened chats
     showNotification(message) {
       const notification = {
         id: this.notificationId++,

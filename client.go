@@ -82,13 +82,17 @@ func (c *Client) read() {
 		msg := Message{}
 		if err := c.conn.ReadJSON(&msg); err != nil {
 			log.Println("ws read err: ", err)
+			log.Println("WebSocket connection closed by client")
+			UnregisterClient(c.username)
 			return
+		}
+		if msg.Date == "deleteUser" {
+			UnregisterClient(msg.Content.(string))
 		}
 		msg.From = c.username
 		msg.Type = "chat"
 		log.Printf("incoming message %+v", msg)
 
-		// if msg.Type != "activeUsers" && msg.Type != "listMsgs" {
 		database, _ := sql.Open("sqlite3", "./messages.db")
 		err := insertMessage(database, msg.From, msg.To, msg.Content.(string), msg.Date)
 		log.Printf("message entered into db")
@@ -98,7 +102,6 @@ func (c *Client) read() {
 		//updates recip and author message lists
 		sendUserMessages(c)
 		sendUserMessages(clients[msg.To])
-		// }
 
 		messages <- msg
 	}
@@ -108,12 +111,19 @@ func (c *Client) read() {
 func (c *Client) write() {
 	defer c.conn.Close()
 	for msg := range c.outbound {
-		log.Printf("Sending message %+v to %v", msg, c.username)
+		//log.Printf("Sending message %+v to %v", msg, c.username)
 		if err := c.conn.WriteJSON(msg); err != nil {
 			log.Println("ws write err: ", err)
 			return
 		}
 	}
+}
+
+func UnregisterClient(c string) {
+	// Remove the client from the map
+	fmt.Printf("deleted %v", c)
+	delete(clients, clients[c].username)
+	sendActiveUsers()
 }
 
 //adds message to messages.db
@@ -136,7 +146,7 @@ func sendActiveUsers() {
 	for _, client := range clients {
 		client.outbound <- Message{
 			Type:    "activeUsers",
-			To:      "",
+			To:      client.username,
 			From:    "",
 			Content: activeUsers,
 			Date:    "",
@@ -146,7 +156,6 @@ func sendActiveUsers() {
 
 //broadcasts latest messages from users to sort them in chatbar
 func sendUserMessages(c *Client) {
-	log.Printf("sendUserMessages")
 	// Connect to user.db
 	userDB, err := sql.Open("sqlite3", "./user.db")
 	if err != nil {

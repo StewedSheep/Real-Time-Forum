@@ -39,6 +39,11 @@ export default {
   },
   methods: {
     openChatBox(user) {
+      this.chatBoxes.forEach((chatBox) => {
+        if (chatBox.title === user) {
+          this.chatBoxes = this.chatBoxes.filter((item) => item.title !== user);
+        }
+      });
       this.chatBoxes.push({
         title: user,
         visible: true,
@@ -111,8 +116,6 @@ export default {
             <span v-else id="chatBarButton" class="statusDotOffline" />
           </div>
           <br />
-          <!-- last message data -->
-          <p id="chatBarButton">Last msg: 1</p>
         </div>
 
         <!-- message box containers -->
