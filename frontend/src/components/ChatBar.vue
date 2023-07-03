@@ -25,7 +25,8 @@ export default {
       user: {
         name: "",
       },
-      allUsers: [],
+      totUsers: [],
+      allUsers: [{ name: "", online: false, date: "" }],
       chatBoxes: [],
     };
   },
@@ -34,7 +35,7 @@ export default {
     return { usersRef };
   },
   mounted() {
-    Vue.axios.get("/totUsers").then((response) => (this.allUsers = response.data));
+    Vue.axios.get("/totUsers").then((response) => (this.totUsers = response.data));
     this.sortUsers();
   },
   methods: {
@@ -57,32 +58,57 @@ export default {
 
     // based on last message and then in alphabetical order
     sortUsers() {
-      const customSort = (a, b) => {
-        const dateA = this.list[a];
-        const dateB = this.list[b];
-        if (
-          (dateA === "no date" || dateA === "no msgs") &&
-          (dateB === "no date" || dateB === "no msgs")
-        ) {
-          return a.localeCompare(b);
-        } else if (dateA === "no date" || dateA === "no msgs") {
-          return 1;
-        } else if (dateB === "no date" || dateB === "no msgs") {
-          return -1;
-        }
-        return dateB.localeCompare(dateA);
+      const options = {
+        dateStyle: "short",
+        timeStyle: "short",
       };
-      this.allUsers = this.allUsers.sort(customSort);
 
+      this.allUsers = this.totUsers.map((name) => ({
+        name: name,
+        online: this.users.includes(name),
+        date: new Date(this.list[name]).toLocaleString("it-IT", options),
+      }));
       // Remove the users name from the array
-      const index = this.allUsers.findIndex((name) => name === this.$user.current);
-      if (index !== -1) {
-        this.allUsers.splice(index, 1);
-      }
+      this.allUsers = this.allUsers.filter((user) => user.name !== this.$user.current);
+
+      const compareUsernames = (a, b) => {
+        // Handle "Invalid Date" or "no date" cases
+        if (
+          a.date === "Invalid Date" ||
+          b.date === "Invalid Date" ||
+          a.date === "no date" ||
+          b.date === "no date"
+        ) {
+          if (a.date === "Invalid Date" || a.date === "no date") {
+            return 1;
+          }
+          if (b.date === "Invalid Date" || b.date === "no date") {
+            return -1;
+          }
+        }
+
+        // Compare dates
+        const dateA = new Date(this.list[a.name]);
+        const dateB = new Date(this.list[b.name]);
+        if (dateA > dateB) return -1;
+        if (dateA < dateB) return 1;
+
+        // Compare names alphabetically
+        return a.name.localeCompare(b.name);
+      };
+
+      // Sorting the usernames array
+      this.allUsers.sort(compareUsernames);
     },
   },
   watch: {
     list: {
+      deep: true,
+      handler() {
+        this.sortUsers();
+      },
+    },
+    users: {
       deep: true,
       handler() {
         this.sortUsers();
@@ -107,15 +133,16 @@ export default {
           id="chatButton"
           v-for="user in this.allUsers"
           :key="user"
-          @click="openChatBox(user)"
+          @click="openChatBox(user.name)"
         >
-          <h5 id="chatBarButton">{{ user }}</h5>
+          <h5 id="chatBarButton">{{ user.name }}</h5>
           <!-- sets online indicator -->
-          <div v-for="actUser in users" :key="actUser">
-            <span v-if="user == actUser" id="chatBarButton" class="statusDotOnline" />
-            <span v-else id="chatBarButton" class="statusDotOffline" />
-          </div>
+          <span v-if="user.online == true" id="chatBarButton" class="statusDotOnline" />
           <br />
+          <div v-if="user.date != 'Invalid Date'">
+            <p id="chatBarButton">Last msg.</p>
+            <p id="chatBarButton" style="float: right">{{ user.date }}</p>
+          </div>
         </div>
 
         <!-- message box containers -->

@@ -169,6 +169,7 @@ background-color: #E6AF2E;
 }
 .statusDotOnline {
     float: right;
+    margin-top: 10px;
     height: 10px;
     width: 10px;
     background-color: rgb(3, 172, 3);

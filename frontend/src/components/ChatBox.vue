@@ -15,7 +15,7 @@
         }"
         class="message"
       >
-        {{ msg.from }}: {{ msg.content }} {{ msg.date }}
+        {{ msg.from }}: {{ msg.content }} <br />{{ formattedDate(msg.date) }}
       </div>
       <div ref="bottomEl"></div>
     </div>
@@ -93,6 +93,15 @@ export default {
 
     close() {
       this.$emit("close");
+    },
+
+    formattedDate(dated) {
+      const dateObject = new Date(dated);
+      const formatted = dateObject.toLocaleString("it-IT", {
+        dateStyle: "short",
+        timeStyle: "short",
+      });
+      return formatted;
     },
 
     loadMoreMessages() {
