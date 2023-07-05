@@ -20,6 +20,9 @@ export default {
     const usersRef = toRef(props, "users");
     return { usersRef };
   },
+  created() {
+    Vue.axios.get("/totUsers").then((response) => (this.totUsers = response.data));
+  },
   mounted() {
     EventBus.$on("users", (eventData) => {
       this.users = eventData;
@@ -31,8 +34,6 @@ export default {
       console.log("chatbar.vue", eventData);
       this.sortUsers();
     });
-    Vue.axios.get("/totUsers").then((response) => (this.totUsers = response.data));
-    this.sortUsers();
   },
   methods: {
     openChatBox(user) {
@@ -58,12 +59,19 @@ export default {
         dateStyle: "short",
         timeStyle: "short",
       };
-
-      this.allUsers = this.totUsers.map((name) => ({
-        name: name,
-        online: this.users.includes(name),
-        date: new Date(this.list[name]).toLocaleString("it-IT", options),
-      }));
+      if (this.list != undefined) {
+        this.allUsers = this.totUsers.map((name) => ({
+          name: name,
+          online: this.users.includes(name),
+          date: new Date(this.list[name]).toLocaleString("it-IT", options),
+        }));
+      } else {
+        this.allUsers = this.totUsers.map((name) => ({
+          name: name,
+          online: this.users.includes(name),
+          date: "no date",
+        }));
+      }
       // Remove the users name from the array
       this.allUsers = this.allUsers.filter((user) => user.name !== this.$user.current);
 

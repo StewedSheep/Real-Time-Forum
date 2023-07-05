@@ -50,6 +50,10 @@ The Project was assigned before the exercise requirements were changed, therefor
 4. Create new threads to start discussions or participate in existing threads by adding comments.
 5. Log out of the application when done.
 
+## Limitations
+
+Due to the build being ran locally vue does not support conditional rerouting. The webpage is meantto redirect after registering and logging-in. Sorry for the inconvenience.
+
 ## Authors
 
 - [@KristjanL](https://01.kood.tech/git/KristjanL)
