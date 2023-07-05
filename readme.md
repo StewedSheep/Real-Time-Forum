@@ -1,6 +1,6 @@
 # Real-Time-Forum
 
-This project is a forum webpage (named Golden Time Forum). The Project is written in Golang and Vue2.
+This project is a forum webpage named Golden Time Forum. The Project is written in Golang and Vue2.
 The Project was assigned before the exercise requirements were changed, therefore this application is ran on Vue.
 
 ## Table of Contents
@@ -22,8 +22,9 @@ The Project was assigned before the exercise requirements were changed, therefor
 ## Technologies
 
 - Vue.js 2: Frontend JavaScript framework for building the user interface.
-- Gorilla WebSocket: Backend library for implementing WebSocket communication.
-- Other technologies used in the project (e.g., backend language, database, etc.).
+- Gorilla WebSocket: Backend library for implementing WebSocket communication such as listing active clients and messaging.
+- Golang: Handle server-side logic and provide the necessary functionality and data to support the Vue.js frontend application.
+- SQLite3 : Store and manage user data, messages, comments and threads in the application.
 
 ## Installation
 
