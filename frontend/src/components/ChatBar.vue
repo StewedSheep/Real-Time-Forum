@@ -6,20 +6,6 @@ import ChatBox from "./ChatBox.vue";
 
 export default {
   name: "ChatBar.vue",
-  props: {
-    msgList: {
-      type: Array,
-      required: true,
-    },
-    users: {
-      type: Array,
-      required: true,
-    },
-    list: {
-      type: Object,
-      required: true,
-    },
-  },
   data() {
     return {
       user: {
@@ -35,6 +21,16 @@ export default {
     return { usersRef };
   },
   mounted() {
+    EventBus.$on("users", (eventData) => {
+      this.users = eventData;
+      console.log("chatbar.vue", eventData);
+      this.sortUsers();
+    });
+    EventBus.$on("list", (eventData) => {
+      this.list = eventData;
+      console.log("chatbar.vue", eventData);
+      this.sortUsers();
+    });
     Vue.axios.get("/totUsers").then((response) => (this.totUsers = response.data));
     this.sortUsers();
   },
@@ -101,20 +97,6 @@ export default {
       this.allUsers.sort(compareUsernames);
     },
   },
-  watch: {
-    list: {
-      deep: true,
-      handler() {
-        this.sortUsers();
-      },
-    },
-    users: {
-      deep: true,
-      handler() {
-        this.sortUsers();
-      },
-    },
-  },
   components: {
     ChatBox,
   },
@@ -140,7 +122,7 @@ export default {
           <span v-if="user.online == true" id="chatBarButton" class="statusDotOnline" />
           <br />
           <div v-if="user.date != 'Invalid Date'">
-            <p id="chatBarButton">Last msg.</p>
+            <p id="chatBarButton">Last message:</p>
             <p id="chatBarButton" style="float: right">{{ user.date }}</p>
           </div>
         </div>

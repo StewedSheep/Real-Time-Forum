@@ -7,7 +7,7 @@
       type="dark"
       variant="info"
     >
-      <ChatBar :users="users" :list="list" />
+      <ChatBar />
       <b-navbar-nav class="ml-auto">
         <em class="loggedInAs">Logged in as: {{ $user.current }} </em>
         <router-link class="logButton" to="newThread">Create a New Thread</router-link>
@@ -25,15 +25,6 @@ import { toRef } from "vue";
 import ChatBar from "./ChatBar.vue";
 
 export default {
-  props: {
-    users: {
-      type: Array,
-      required: true,
-    },
-    list: {
-      type: Object,
-    },
-  },
   data() {
     return {
       user: {
@@ -51,6 +42,19 @@ export default {
           "Access-Control-Allow-Origin": "*",
         },
       });
+      // .then((_) => {
+      //   if (!this.isLoginCookieExists) {
+      //     console.log(_);
+      //     App.$forceUpdate();
+      //   }
+      // });
+    },
+    isLoginCookieExists() {
+      return this.getLoginCookieValue() != undefined;
+    },
+    getLoginCookieValue() {
+      const cookie = document.cookie;
+      return cookie.split("::")[1];
     },
   },
   setup(props) {

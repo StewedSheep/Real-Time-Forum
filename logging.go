@@ -90,5 +90,5 @@ func ResetCookie(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("deleted cookies")
 	http.SetCookie(w, &cookie)
-	w.Header().Set("Refresh", "0.3")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
