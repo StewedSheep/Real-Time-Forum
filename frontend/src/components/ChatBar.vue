@@ -122,7 +122,7 @@ export default {
           <span v-if="user.online == true" id="chatBarButton" class="statusDotOnline" />
           <br />
           <div v-if="user.date != 'Invalid Date'">
-            <p id="chatBarButton">Last message:</p>
+            <p id="chatBarButton">Last msg:</p>
             <p id="chatBarButton" style="float: right">{{ user.date }}</p>
           </div>
         </div>
